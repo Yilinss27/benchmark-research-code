@@ -1,0 +1,9 @@
+以下是 {industry_name} 行业 {N} 只股票，信息截止日期 {cutoff_date}。
+
+【财务基本面指标】
+{fundamentals_dict}
+
+请综合上述信号，预测这 {N} 只股票未来 {prediction_window_days} 天收益率从高到低的排名，输出 JSON 数组（代码顺序即排名）：
+["code_rank_1", "code_rank_2", ..., "code_rank_N"]
+
+请严格输出 JSON，不要输出任何额外文字、解释或 markdown 代码块。

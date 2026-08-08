@@ -1,0 +1,12 @@
+以下是 {stock_name} 近两个季度的财务摘要：
+{historical_financials}
+
+截止 {cutoff_date} 之前获取的第三方参考信息：
+{third_party_info}
+
+请基于上述信息，预测下一季度财报中「{metric_name}」的数值。
+
+以下面 JSON 格式输出：
+{"predicted_value": <浮点数>}
+
+请严格输出 JSON，不要输出任何额外文字、解释或 markdown 代码块。

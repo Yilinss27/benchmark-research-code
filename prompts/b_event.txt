@@ -1,0 +1,15 @@
+信息截止日期：{cutoff_date}
+
+事件：{event_description}
+
+股票：{stock_name}（{stock_code}）
+
+请预测该股票在事件发生后短期内的价格方向。
+
+以下面 JSON 格式输出：
+{
+  "direction": "up" 或 "down",
+  "probability_up": <0到1的浮点数>
+}
+
+请严格输出 JSON，不要输出任何额外文字、解释或 markdown 代码块。

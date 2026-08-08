@@ -1,0 +1,55 @@
+{
+  "dataset_name": "benchmark-research",
+  "version": "0.4.0",
+  "status": "dataset_release_candidate",
+  "license": "cc-by-4.0",
+  "hf_repo": "sselaine27/benchmark-research",
+  "hf_package": "hf_dataset/",
+  "decoupling": {
+    "hf_contains": ["README.md", "data/<config>/train.jsonl"],
+    "code_repo_contains": ["src/", "prompts/", "scripts/", "data/*.csv", "seeds/", "docs/"]
+  },
+  "task_files": {
+    "A1": {"file": "seeds/a1_valuation.jsonl", "hf_config": "a1", "status": "ready"},
+    "A2-F": {"file": "seeds/a2_fundamentals.jsonl", "hf_config": "a2_f", "status": "ready"},
+    "A2-T": {"file": "seeds/a2_technical.jsonl", "hf_config": "a2_t", "status": "ready"},
+    "A2-H": {"file": "seeds/a2_hybrid.jsonl", "hf_config": "a2_h", "status": "ready"},
+    "B": {"file": "seeds/b_event.jsonl", "hf_config": "b", "status": "ready"},
+    "C": {"file": "seeds/c_financial_metric.jsonl", "hf_config": "c", "status": "ready"},
+    "D": {"file": "seeds/d_counterfactual.jsonl", "hf_config": "d", "status": "ready"},
+    "E": {"file": "seeds/e_formula.jsonl", "hf_config": "e", "status": "ready"}
+  },
+  "counts": {
+    "A1_ready": 20,
+    "A2-F_ready": 2,
+    "A2-T_ready": 2,
+    "A2-H_ready": 2,
+    "B_ready": 10,
+    "C_ready": 76,
+    "D_ready": 12,
+    "E_ready": 12,
+    "template_records": 10,
+    "total_ready_records": 136
+  },
+  "validation": {
+    "script": "scripts/validate.py",
+    "command": "python scripts/validate.py"
+  },
+  "temporal_split": {
+    "script": "scripts/assign_time_bands.py",
+    "command": "python scripts/assign_time_bands.py --training-cutoff 2024-06-01 --current-date 2026-08-08 --in-place",
+    "model_training_cutoff": "2024-06-01",
+    "reference_current_date": "2026-08-08",
+    "rule": "T1: cutoff_date <= model_training_cutoff; T2: model_training_cutoff < cutoff_date < reference_current_date; T3: cutoff_date >= reference_current_date",
+    "counts": {
+      "T1": 16,
+      "T2": 116,
+      "T3": 4
+    }
+  },
+  "export": {
+    "script": "scripts/export_hf_dataset.py",
+    "command": "python scripts/export_hf_dataset.py --clean"
+  },
+  "notes": "v0.4.0: Adds reproducible temporal split metadata for T1/T2/T3 using cutoff_date, model_training_cutoff, and reference_current_date. HF data-only package remains under hf_dataset/."
+}
