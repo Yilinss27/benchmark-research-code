@@ -49,7 +49,7 @@ Yahoo 边界：非官方接口、有限流；A 股财务/事件质量差；365 �
 - [x] `scripts/export_hf_dataset.py` 导出 `hf_dataset/`（仅数据）
 - [x] HF dataset card 配置 `configs`（`a1`/`a2_f`/…/`e`）
 - [x] 将 `hf_dataset/` 上传到 HF，并删除远端代码文件
-- [ ] 本代码仓推送到独立 GitHub
+- [x] 本代码仓推送到独立 GitHub
 
 ## 公开发布
 
@@ -58,7 +58,7 @@ Yahoo 边界：非官方接口、有限流；A 股财务/事件质量差；365 �
 
 ## 完成检查
 
-- [ ] `python scripts/validate.py`
-- [ ] `python scripts/export_hf_dataset.py --clean`
-- [ ] `manifest.json` 计数与 seeds 行数一致
-- [ ] `load_dataset("sselaine27/benchmark-research", "a1")` 可按子集加载
+- [x] `python scripts/validate.py`
+- [x] `python scripts/export_hf_dataset.py --clean`
+- [x] `manifest.json` 计数与 seeds 行数一致
+- [x] `load_dataset("sselaine27/benchmark-research", "a1")` 可按子集加载
