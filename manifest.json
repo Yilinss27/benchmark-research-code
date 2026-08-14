@@ -1,13 +1,13 @@
 {
   "dataset_name": "benchmark-research",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "status": "dataset_release_candidate",
   "license": "cc-by-4.0",
   "hf_repo": "sselaine27/benchmark-research",
   "hf_package": "hf_dataset/",
   "decoupling": {
     "hf_contains": ["README.md", "data/<config>/train.jsonl"],
-    "code_repo_contains": ["src/", "prompts/", "scripts/", "data/*.csv", "seeds/", "docs/"]
+    "code_repo_contains": ["src/", "prompts/", "scripts/", "docs/", "README.md"]
   },
   "task_files": {
     "A1": {"file": "seeds/a1_valuation.jsonl", "hf_config": "a1", "status": "ready"},
@@ -20,16 +20,16 @@
     "E": {"file": "seeds/e_formula.jsonl", "hf_config": "e", "status": "ready"}
   },
   "counts": {
-    "A1_ready": 20,
+    "A1_ready": 72,
     "A2-F_ready": 2,
-    "A2-T_ready": 2,
+    "A2-T_ready": 10,
     "A2-H_ready": 2,
     "B_ready": 10,
     "C_ready": 76,
     "D_ready": 12,
     "E_ready": 12,
     "template_records": 10,
-    "total_ready_records": 136
+    "total_ready_records": 196
   },
   "validation": {
     "script": "scripts/validate.py",
@@ -42,8 +42,8 @@
     "reference_current_date": "2026-08-08",
     "rule": "T1: cutoff_date <= model_training_cutoff; T2: model_training_cutoff < cutoff_date < reference_current_date; T3: cutoff_date >= reference_current_date",
     "counts": {
-      "T1": 16,
-      "T2": 116,
+      "T1": 46,
+      "T2": 146,
       "T3": 4
     }
   },
@@ -51,5 +51,5 @@
     "script": "scripts/export_hf_dataset.py",
     "command": "python scripts/export_hf_dataset.py --clean"
   },
-  "notes": "v0.4.0: Adds reproducible temporal split metadata for T1/T2/T3 using cutoff_date, model_training_cutoff, and reference_current_date. HF data-only package remains under hf_dataset/."
+  "notes": "v0.5.0: Adds Yahoo-backed T1/T2 pairing for A1 and A2-T across CN_A/US/HK. GitHub remains code-only; HF remains data-only."
 }

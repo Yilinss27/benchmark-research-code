@@ -1,15 +1,15 @@
 你是一位专业的股票分析师。
 请仅基于 {cutoff_date} 之前的公开信息，对 {stock_name}（{stock_code}）进行分析。
-截至 {cutoff_date}，该股收盘价约 {cutoff_price} 元/股。
+截至 {cutoff_date}，该股收盘价约 {cutoff_price} {currency_unit}/股。
 
-请给出 market_value_range（市场价值回归目标价，元/股，考虑当前市场环境，非内生价值），
+请给出 market_value_range（市场价值回归目标价，{currency_unit}/股，考虑当前市场环境，非内生价值），
 以及价格回归至该区间所需的修复期。
 
 以下面 JSON 格式输出，不要附加任何其他内容：
 {
-  "bull": <乐观情景目标价（元，浮点数）>,
-  "base": <基准情景目标价（元，浮点数）>,
-  "bear": <悲观情景目标价（元，浮点数）>,
+  "bull": <乐观情景目标价（{currency_unit}，浮点数）>,
+  "base": <基准情景目标价（{currency_unit}，浮点数）>,
+  "bear": <悲观情景目标价（{currency_unit}，浮点数）>,
   "reversion_horizon": "<从以下选项选一：1-4周 / 1-3个月 / 3-6个月 / 6-12个月 / 超过12个月>"
 }
 

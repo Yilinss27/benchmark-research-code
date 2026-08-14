@@ -23,16 +23,16 @@ REQUIRED_COLUMNS = {
 
 DEFAULT_PROMPT_TEMPLATE = """你是一位专业的股票分析师。
 请仅基于 {cutoff_date} 之前的公开信息，对 {stock_name}（{stock_code}）进行分析。
-截至 {cutoff_date}，该股收盘价约 {cutoff_price} 元/股。
+截至 {cutoff_date}，该股收盘价约 {cutoff_price} {currency_unit}/股。
 
-请给出 market_value_range（市场价值回归目标价，元/股，考虑当前市场环境，非内生价值），
+请给出 market_value_range（市场价值回归目标价，{currency_unit}/股，考虑当前市场环境，非内生价值），
 以及价格回归至该区间所需的修复期。
 
 以下面 JSON 格式输出，不要附加任何其他内容：
 {
-  "bull": <乐观情景目标价（元，浮点数）>,
-  "base": <基准情景目标价（元，浮点数）>,
-  "bear": <悲观情景目标价（元，浮点数）>,
+  "bull": <乐观情景目标价（{currency_unit}，浮点数）>,
+  "base": <基准情景目标价（{currency_unit}，浮点数）>,
+  "bear": <悲观情景目标价（{currency_unit}，浮点数）>,
   "reversion_horizon": "<从以下选项选一：1-4周 / 1-3个月 / 3-6个月 / 6-12个月 / 超过12个月>"
 }
 
@@ -55,15 +55,17 @@ def _read_prompt_template() -> str:
         return DEFAULT_PROMPT_TEMPLATE
     content = template_path.read_text(encoding="utf-8")
     required_vars = {"{stock_name}", "{stock_code}", "{cutoff_date}", "{cutoff_price}"}
-    if not required_vars.issubset(set(part for part in required_vars if part in content)):
+    if not all(token in content for token in required_vars):
         return DEFAULT_PROMPT_TEMPLATE
     return content
 
 
-def _parse_optional_float(value: str) -> float | None:
+def _parse_optional_float(value: str | None) -> float | None:
     """Convert a CSV string to float or null."""
-    stripped = value.strip()
-    if stripped == "":
+    if value is None:
+        return None
+    stripped = str(value).strip()
+    if stripped == "" or stripped.lower() == "none":
         return None
     return float(stripped)
 
@@ -74,29 +76,43 @@ def _infer_time_band(cutoff_date: str) -> str:
     return "T2" if year >= 2024 else "T1"
 
 
-def _render_prompt(template: str, row: dict[str, str], cutoff_price: float) -> str:
+def _render_prompt(
+    template: str,
+    row: dict[str, str],
+    cutoff_price: float,
+    currency_unit: str = "元",
+) -> str:
     """Render the A1 prompt template with row values."""
     rendered = template
     rendered = rendered.replace("{stock_name}", row["stock_name"])
     rendered = rendered.replace("{stock_code}", row["stock_code"])
     rendered = rendered.replace("{cutoff_date}", row["cutoff_date"])
     rendered = rendered.replace("{cutoff_price}", f"{cutoff_price:.2f}")
+    rendered = rendered.replace("{currency_unit}", currency_unit)
     return rendered
 
 
-def build_record(row: dict[str, str], template: str, source_name: str) -> dict[str, Any]:
-    """Build one A1 ready record from a CSV row."""
+def build_record(
+    row: dict[str, str],
+    template: str,
+    source_name: str,
+    market: str = "CN_A",
+    currency: str = "CNY",
+    currency_unit: str = "元",
+) -> dict[str, Any]:
+    """Build one A1 ready record from a CSV-like row."""
     cutoff_price = float(row["cutoff_price"])
     actual_prices = {
-        "30": _parse_optional_float(row["price_30d"]),
-        "90": _parse_optional_float(row["price_90d"]),
-        "180": _parse_optional_float(row["price_180d"]),
-        "365": _parse_optional_float(row["price_365d"]),
+        "30": _parse_optional_float(row.get("price_30d")),
+        "90": _parse_optional_float(row.get("price_90d")),
+        "180": _parse_optional_float(row.get("price_180d")),
+        "365": _parse_optional_float(row.get("price_365d")),
     }
     return {
         "task_id": row["task_id"],
         "category": "A1",
         "variant": None,
+        "cutoff_date": row["cutoff_date"],
         "time_band": _infer_time_band(row["cutoff_date"]),
         "status": "ready",
         "seed": {
@@ -104,8 +120,10 @@ def build_record(row: dict[str, str], template: str, source_name: str) -> dict[s
             "stock_name": row["stock_name"],
             "cutoff_date": row["cutoff_date"],
             "cutoff_price": cutoff_price,
+            "market": market,
+            "currency": currency,
         },
-        "prompt": _render_prompt(template, row, cutoff_price),
+        "prompt": _render_prompt(template, row, cutoff_price, currency_unit=currency_unit),
         "expected_output": {
             "bull": "float",
             "base": "float",
@@ -120,9 +138,33 @@ def build_record(row: dict[str, str], template: str, source_name: str) -> dict[s
         "metadata": {
             "source": source_name,
             "is_template": False,
-            "builder_version": "a1_csv_builder_v1",
+            "builder_version": "a1_csv_builder_v2",
+            "market": market,
+            "currency": currency,
         },
     }
+
+
+def build_records(
+    rows: list[dict[str, str]],
+    source_name: str,
+    market: str = "CN_A",
+    currency: str = "CNY",
+    currency_unit: str = "元",
+) -> list[dict[str, Any]]:
+    """Build A1 records from CSV-like rows."""
+    template = _read_prompt_template()
+    return [
+        build_record(
+            row,
+            template,
+            source_name,
+            market=market,
+            currency=currency,
+            currency_unit=currency_unit,
+        )
+        for row in rows
+    ]
 
 
 def load_csv_rows(csv_path: Path) -> list[dict[str, str]]:
@@ -168,9 +210,8 @@ def main() -> int:
     csv_path = Path(args.csv)
     output_path = Path(args.output)
 
-    template = _read_prompt_template()
     rows = load_csv_rows(csv_path)
-    records = [build_record(row, template, csv_path.name) for row in rows]
+    records = build_records(rows, csv_path.name)
     write_jsonl(output_path, records)
 
     print(

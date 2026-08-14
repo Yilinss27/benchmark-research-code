@@ -1,29 +1,41 @@
 # TODO
 
-v0.4.0 之后仍待补充。
+v0.5.0 之后仍待补充。
 
 ## 数据扩量
 
 ### A1 / A2（受源 CSV 限制）
 
-- [ ] 扩充 `data/a1_price_snapshots.csv` 后重跑 A1 builder
-- [ ] 新增 A2 cohort + 对应 `a2_price_series` / fundamentals 后重跑 A2-F/T/H
+- [x] Yahoo 路径下为现有 A1/A2-T 股票池补 T1/T2 配对（见 `scripts/generate_t1_t2_pairs.py`）
+- [ ] 扩充 `data/a1_price_snapshots.csv` 后重跑 A1 builder（CSV 路径仍可用）
+- [ ] 新增 A2-F/H cohort + 对应 fundamentals 后重跑 A2-F/H
 - [ ] 补齐 cutoff 前 fundamentals，去掉 `prototype_fallback_nearest`
 
-### 数据接口接入（A股 / 美股）
+## Data Interface (Yahoo MVP)
 
-当前数据来自手动下载后的本地 CSV。后续需要把 builder 前的数据层抽象出来，支持从标准数据接口拉取并缓存，再生成统一 seed。
+Price-driven A1 / A2-T generation now goes through `src.data_generator` and `src.data.providers.yahoo`. Yahoo cache lives in `data/cache/yahoo/` and is not published.
 
-- [ ] 设计统一行情接口：`get_price_history(symbol, start_date, end_date, market)`
-- [ ] 设计统一财务接口：`get_fundamentals(symbol, as_of_date, market)`
-- [ ] 设计统一事件接口：`get_events(symbol_or_index, start_date, end_date, market)`
-- [ ] 增加市场字段：`market = CN_A | US`
-- [ ] A股数据源候选：Tushare、AkShare、BaoStock、Wind/Choice（如有权限）
-- [ ] 美股数据源候选：Polygon、Alpha Vantage、Yahoo Finance、SEC/EDGAR、FMP
-- [ ] 为每个接口增加本地缓存层，避免重复请求和保证可复现
-- [ ] 为 A1/A2/B/C builder 增加 `--market` 与 `--data-provider` 参数
-- [ ] 明确数据许可与再分发边界：接口拉取代码可开源，原始商业数据不直接上传 GitHub
-- [ ] 补充 US stocks 的 A1/A2/C 样例，并确认 ticker / exchange / currency 字段规范
+This round:
+
+- [x] 统一行情接口：`get_price_history` / `get_close_on_or_before` / `get_forward_close`
+- [x] Yahoo provider + ticker 映射（`CN_A` / `US` / `HK`）+ 本地 JSON cache
+- [x] `python -m src.data_generator --task A1|A2-T --market ... --cutoff-date ...`
+- [x] seed 增加 `market` / `currency`；A1 prompt 按货币单位渲染
+- [x] 为 A1/A2-T 补配对 T1（2023-12-29）与 T2（2026-01-30）；US/HK 最小股票池
+- [ ] 设计统一财务接口：`get_fundamentals(symbol, as_of_date, market)`（Yahoo 非 PIT，本轮不做）
+- [ ] 设计统一事件接口：`get_events(...)`（Yahoo news 不稳定，本轮不做）
+- [ ] 用 Yahoo 硬造 A2-F / A2-H / C
+- [ ] 大规模美股/港股题库
+- [ ] 真实 T3（未来标签未实现）
+
+Yahoo 边界：非官方接口、有限流；A 股财务/事件质量差；365 日窗口若尚未实现则标签为 null。
+
+相关论文（时间泄漏 / cutoff）：
+
+- [Profit Mirage](https://arxiv.org/abs/2510.07920)
+- [Time Travel is Cheating: DeepFund](https://arxiv.org/abs/2505.11065)
+- [The Memorization Problem](https://arxiv.org/abs/2504.14765)
+- [A Test of Lookahead Bias in LLM Forecasts](https://arxiv.org/abs/2512.23847)
 
 ### 已完成（v0.3.0 / v0.4.0）
 

@@ -49,6 +49,17 @@
 - `is_template: false` — 可用于 baseline / 正式评测
 - `temporal_split` — ready seeds 必填，用于复现 T1/T2/T3 时间泄漏切分
 
+### `seed` 市场字段（A1 / A2-T）
+
+价格驱动题型应包含：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `market` | `str` | `CN_A` / `US` / `HK` |
+| `currency` | `str` | `CNY` / `USD` / `HKD` |
+
+A1 prompt 使用 `{currency_unit}`（`元` / `USD` / `HKD`），避免美股/港股仍写「元/股」。`time_band` 不在造题脚本里写死，由 `scripts/assign_time_bands.py` 或 runner 按 `--model-training-cutoff` 判定。
+
 ## 时间分层（T1/T2/T3）
 
 默认发布参数：

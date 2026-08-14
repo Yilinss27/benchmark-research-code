@@ -1,10 +1,11 @@
 # Local benchmark outputs (regenerate with src.run_benchmark)
 results/
 
-# Data artifacts (do not publish to GitHub code repo)
-data/
-seeds/
-hf_dataset/
+# Data artifacts (do not publish to GitHub code repo).
+# Use a leading slash so src/data/ (provider code) is not ignored.
+/data/
+/seeds/
+/hf_dataset/
 
 # Hugging Face / tooling caches
 .cache/
@@ -14,5 +15,5 @@ __pycache__/
 .env
 .env.*
 
-# Local HF upload scratch (optional; hf_dataset/ is the publish package and is tracked)
+# Local HF upload scratch
 .hf_upload_tmp/

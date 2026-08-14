@@ -17,6 +17,8 @@
 | `stock_name` | `str` | 股票名称 |
 | `cutoff_date` | `str` | 信息截止日期（YYYY-MM-DD） |
 | `cutoff_price` | `float \| null` | cutoff 日收盘价（写入 seed，非 Agent 输出） |
+| `market` | `str` | 市场：`CN_A` / `US` / `HK` |
+| `currency` | `str` | 报价货币：`CNY` / `USD` / `HKD` |
 
 **输出格式**
 
@@ -40,7 +42,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - Reversion Horizon Hit Rate
 - Format Valid Rate
 
-**当前实现状态**：ready（`seeds/a1_valuation.jsonl`，20 条）
+**当前实现状态**：ready（`seeds/a1_valuation.jsonl`）。可用 `python -m src.data_generator --task A1 --market CN_A|US|HK --cutoff-date YYYY-MM-DD` 按 cutoff 成对生成；价格单位随 `currency` 渲染（元 / USD / HKD）。
 
 ---
 
@@ -54,7 +56,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 | Variant | 信号 | Ready 文件 | Template 样例 |
 |---------|------|------------|---------------|
 | F | 仅财务基本面 | `seeds/a2_fundamentals.jsonl`（2 条） | `seeds/templates/a2_fundamentals_template.jsonl` |
-| T | 仅技术指标 | `seeds/a2_technical.jsonl`（2 条） | `seeds/templates/a2_technical_template.jsonl` |
+| T | 仅技术指标 | `seeds/a2_technical.jsonl` | `seeds/templates/a2_technical_template.jsonl` |
 | H | 基本面 + 技术 | `seeds/a2_hybrid.jsonl`（2 条） | `seeds/templates/a2_hybrid_template.jsonl` |
 
 **本地数据文件（`data/`）**
@@ -91,6 +93,8 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 | `cutoff_date` | `str` | 信息截止日期 |
 | `prediction_window_days` | `int` | 预测窗口（交易日） |
 | `signal_variant` | `str` | `F` / `T` / `H` |
+| `market` | `str` | `CN_A` / `US` / `HK`（A2-T Yahoo 生成记录） |
+| `currency` | `str` | `CNY` / `USD` / `HKD` |
 | `fundamentals_dict` | `dict` | F/H 变体提供 |
 | `technical_dict` | `dict` | T/H 变体提供 |
 
@@ -109,7 +113,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - Top-K Hit Rate（K = floor(N/3)）
 - Long-Short Spread
 
-**当前实现状态**：ready（`seeds/a2_fundamentals.jsonl`、`seeds/a2_technical.jsonl`、`seeds/a2_hybrid.jsonl`）
+**当前实现状态**：ready（`seeds/a2_fundamentals.jsonl`、`seeds/a2_technical.jsonl`、`seeds/a2_hybrid.jsonl`）。A2-T 可用 `data_generator` 按市场/cutoff 配对生成；A2-F/H 本轮不走 Yahoo（财务非 point-in-time）。
 
 ---
 

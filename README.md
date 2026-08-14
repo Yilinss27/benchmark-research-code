@@ -32,13 +32,13 @@ The codebase supports three workflows:
 2. Run LLM / agent baselines on ready records.
 3. Export a data-only Hugging Face package.
 
-The current public dataset contains 136 ready records:
+The current public dataset contains 196 ready records:
 
 | Task | Description | HF config | Ready |
 |------|-------------|-----------|------:|
-| A1 | Single-stock valuation range prediction | `a1` | 20 |
+| A1 | Single-stock valuation range prediction | `a1` | 72 |
 | A2-F | Cross-sectional ranking with fundamentals | `a2_f` | 2 |
-| A2-T | Cross-sectional ranking with technicals | `a2_t` | 2 |
+| A2-T | Cross-sectional ranking with technicals | `a2_t` | 10 |
 | A2-H | Cross-sectional ranking with hybrid signals | `a2_h` | 2 |
 | B | Event-driven direction prediction | `b` | 10 |
 | C | Forward financial metric prediction | `c` | 76 |
@@ -122,13 +122,15 @@ Rules:
 - `T2`: `model_training_cutoff < cutoff_date < reference_current_date`
 - `T3`: `cutoff_date >= reference_current_date`
 
-Current distribution:
+Published Hugging Face distribution (v0.5.0, 196 records):
 
 | Time Band | Count | Notes |
 |-----------|------:|-------|
-| T1 | 16 | Mostly formula tasks and synthetic counterfactuals |
-| T2 | 116 | Most real date-bearing records |
+| T1 | 46 | Includes A1/A2-T pairs at `2023-12-29`, plus formula and synthetic D |
+| T2 | 146 | Includes legacy `2025-06-06` rows and A1/A2-T pairs at `2026-01-30` |
 | T3 | 4 | Synthetic future counterfactuals; real T3 labels need future data |
+
+A1 records for `2026-01-30` leave the 365-day window as null because that date is not realized yet. A2-F/H, B, and C are still mostly a single T2 cutoff.
 
 For a model with a different training cutoff, recompute the split:
 
@@ -178,12 +180,63 @@ python scripts/export_hf_dataset.py --clean
 
 The export script writes a data-only package to `hf_dataset/`, which can then be uploaded to Hugging Face.
 
+## Generate Paired T1 / T2 Records
+
+Price-driven tasks can also be generated from Yahoo Finance (`yfinance`) without hand-built CSVs.
+
+```bash
+pip install -r requirements.txt
+
+python -m src.data_generator \
+  --task A1 \
+  --market CN_A \
+  --cutoff-date 2023-12-29 \
+  --provider yahoo \
+  --output seeds/a1_valuation.jsonl \
+  --append
+```
+
+Supported this round:
+
+- `--task A1 | A2-T`
+- `--market CN_A | US | HK`
+
+To fill paired cutoffs for the default universes (T1 `2023-12-29`, T2 `2026-01-30`) and keep existing `2025-06-06` records:
+
+```bash
+python scripts/generate_t1_t2_pairs.py
+```
+
+Yahoo ticker mapping:
+
+| Market | Example | Yahoo ticker |
+|--------|---------|--------------|
+| `CN_A` | `600519` / `000858` | `600519.SS` / `000858.SZ` |
+| `US` | `AAPL` | `AAPL` |
+| `HK` | `0700` | `0700.HK` |
+
+Daily closes are cached under `data/cache/yahoo/` (gitignored). Yahoo is treated as unofficial: rate limits apply, A-share fundamentals/events are not used, and point-in-time financials are not assumed.
+
+Out of scope this round: A2-F, A2-H, C, large B, and real T3 labels (future prices are not realized yet).
+
+## Temporal Leakage Papers
+
+These papers motivate storing `cutoff_date` on every record and assigning `T1`/`T2`/`T3` at evaluation time:
+
+- [Profit Mirage: Revisiting Information Leakage in LLM-based Financial Agents](https://arxiv.org/abs/2510.07920)
+- [Time Travel is Cheating: DeepFund](https://arxiv.org/abs/2505.11065)
+- [The Memorization Problem: Can We Trust LLMs' Economic Forecasts?](https://arxiv.org/abs/2504.14765)
+- [A Test of Lookahead Bias in LLM Forecasts](https://arxiv.org/abs/2512.23847)
+
+Records store `cutoff_date` only. `time_band` is recomputed with `scripts/assign_time_bands.py` or `python -m src.run_benchmark --model-training-cutoff ...`.
+
 ## Code Structure
 
 ```text
 benchmark-research/
 ├── README.md
 ├── TODO.md
+├── requirements.txt
 ├── manifest.json
 ├── docs/
 │   ├── schema.md
@@ -193,13 +246,18 @@ benchmark-research/
 │   └── ...
 ├── scripts/
 │   ├── assign_time_bands.py
+│   ├── generate_t1_t2_pairs.py
 │   ├── export_hf_dataset.py
 │   └── validate.py
 └── src/
     ├── agents/
     ├── builders/
+    ├── data/
+    │   ├── providers/
+    │   └── universe.py
     ├── evaluators/
     ├── parsers/
+    ├── data_generator.py
     ├── load_seeds.py
     └── run_benchmark.py
 ```
@@ -215,20 +273,12 @@ results/     # benchmark outputs
 
 ## Future Data Interface Plan
 
-The current builders start from manually downloaded CSV files. Future work will add provider interfaces for both A-shares and US stocks.
+A1 and A2-T now have a Yahoo Finance MVP (`python -m src.data_generator`). Remaining work is point-in-time fundamentals and events, which Yahoo does not provide reliably:
 
-Planned abstractions:
-
-- `get_price_history(symbol, start_date, end_date, market)`
 - `get_fundamentals(symbol, as_of_date, market)`
 - `get_events(symbol_or_index, start_date, end_date, market)`
 
-Target markets:
-
-- `CN_A` for A-shares
-- `US` for US equities
-
-Candidate providers are tracked in [`TODO.md`](TODO.md).
+Candidate providers for those interfaces are tracked in [`TODO.md`](TODO.md).
 
 ## License
 

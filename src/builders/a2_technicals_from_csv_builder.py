@@ -166,6 +166,9 @@ def build_records(
     cohorts: dict[str, dict[str, Any]],
     prompt_template: str,
     source_name: str,
+    *,
+    market: str = "CN_A",
+    currency: str = "CNY",
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Build A2-T records and collect warnings."""
     records: list[dict[str, Any]] = []
@@ -226,9 +229,10 @@ def build_records(
             }
 
         record = {
-            "task_id": f"A2T-{record_index:05d}",
+            "task_id": cohort.get("task_id") or f"A2T-{record_index:05d}",
             "category": "A2",
             "variant": "T",
+            "cutoff_date": cohort["cutoff_date"],
             "time_band": "T2",
             "status": status,
             "seed": {
@@ -238,6 +242,8 @@ def build_records(
                 "signal_variant": "T",
                 "stock_list": stock_list,
                 "technical_dict": technical_dict,
+                "market": market,
+                "currency": currency,
             },
             "prompt": _render_prompt(
                 prompt_template,
@@ -254,11 +260,13 @@ def build_records(
             "metadata": {
                 "source": source_name,
                 "is_template": False,
-                "builder_version": "a2_technicals_csv_builder_v1",
+                "builder_version": "a2_technicals_csv_builder_v2",
                 "cohort_id": cohort_id,
                 "technical_keys": list(TECHNICAL_KEYS),
                 "technical_metrics_version": TECHNICAL_METRICS_VERSION,
                 "technical_null_metrics": null_metrics_by_stock,
+                "market": market,
+                "currency": currency,
             },
         }
         records.append(record)
