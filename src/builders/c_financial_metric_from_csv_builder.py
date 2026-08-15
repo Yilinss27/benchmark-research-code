@@ -113,7 +113,14 @@ def load_rows(path: Path) -> list[dict[str, str]]:
         return list(reader)
 
 
-def build_record(row: dict[str, str], template: str, source_name: str) -> dict[str, Any]:
+def build_record(
+    row: dict[str, str],
+    template: str,
+    source_name: str,
+    *,
+    market: str = "CN_A",
+    currency: str = "CNY",
+) -> dict[str, Any]:
     """Build one C record from a CSV row."""
     future_value = _parse_optional_float(row.get("future_value"))
     historical_value = _parse_optional_float(row.get("historical_value"))
@@ -131,6 +138,8 @@ def build_record(row: dict[str, str], template: str, source_name: str) -> dict[s
         "report_period_future": row["report_period_future"].strip(),
         "historical_financials": historical_financials,
         "third_party_info": third_party_info,
+        "market": market,
+        "currency": currency,
     }
 
     ground_truth: dict[str, Any] | None
@@ -147,6 +156,7 @@ def build_record(row: dict[str, str], template: str, source_name: str) -> dict[s
         "task_id": row["task_id"].strip(),
         "category": "C",
         "variant": None,
+        "cutoff_date": row["cutoff_date"].strip(),
         "time_band": _infer_time_band(row["cutoff_date"].strip()),
         "status": status,
         "seed": seed,
@@ -165,7 +175,9 @@ def build_record(row: dict[str, str], template: str, source_name: str) -> dict[s
         "metadata": {
             "source": source_name,
             "is_template": status == "template",
-            "builder_version": "c_financial_metric_csv_builder_v1",
+            "builder_version": "c_financial_metric_csv_builder_v2",
+            "market": market,
+            "currency": currency,
         },
     }
 

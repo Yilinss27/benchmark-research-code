@@ -67,6 +67,34 @@ A1_UNIVERSE: dict[str, list[UniverseName]] = {
     ],
 }
 
+B_UNIVERSE: dict[str, list[UniverseName]] = {
+    "CN_A": [
+        {"stock_code": "600519", "stock_name": "贵州茅台"},
+        {"stock_code": "000858", "stock_name": "五粮液"},
+        {"stock_code": "601318", "stock_name": "中国平安"},
+        {"stock_code": "600036", "stock_name": "招商银行"},
+        {"stock_code": "300750", "stock_name": "宁德时代"},
+        {"stock_code": "002594", "stock_name": "比亚迪"},
+    ],
+    "US": [
+        {"stock_code": "AAPL", "stock_name": "Apple"},
+        {"stock_code": "MSFT", "stock_name": "Microsoft"},
+        {"stock_code": "JPM", "stock_name": "JPMorgan"},
+    ],
+    "HK": [
+        {"stock_code": "0700", "stock_name": "腾讯控股"},
+        {"stock_code": "0005", "stock_name": "汇丰控股"},
+        {"stock_code": "9988", "stock_name": "阿里巴巴"},
+    ],
+}
+
+C_METRICS = ("operating_revenue", "net_profit")
+
+B_EVENT_WINDOWS = {
+    "2023-12-29": ("2023-07-01", "2024-06-01"),
+    "2026-01-30": ("2025-07-01", "2026-07-31"),
+}
+
 A2_T_COHORTS: dict[str, list[CohortSpec]] = {
     "CN_A": [
         {

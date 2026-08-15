@@ -101,6 +101,9 @@ def build_records(
     prompt_template: str,
     fundamentals_source: str,
     price_source: str,
+    *,
+    market: str = "CN_A",
+    currency: str = "CNY",
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Build A2-H records and collect warnings."""
     records: list[dict[str, Any]] = []
@@ -195,9 +198,10 @@ def build_records(
             }
 
         record = {
-            "task_id": f"A2H-{record_index:05d}",
+            "task_id": cohort.get("task_id") or f"A2H-{record_index:05d}",
             "category": "A2",
             "variant": "H",
+            "cutoff_date": cohort["cutoff_date"],
             "time_band": "T2",
             "status": status,
             "seed": {
@@ -208,6 +212,8 @@ def build_records(
                 "stock_list": stock_list,
                 "fundamentals_dict": fundamentals_dict,
                 "technical_dict": technical_dict,
+                "market": market,
+                "currency": currency,
             },
             "prompt": _render_prompt(
                 prompt_template,
@@ -225,7 +231,7 @@ def build_records(
             "metadata": {
                 "source": f"{fundamentals_source}+{price_source}",
                 "is_template": False,
-                "builder_version": "a2_hybrid_csv_builder_v1",
+                "builder_version": "a2_hybrid_csv_builder_v2",
                 "cohort_id": cohort_id,
                 "technical_keys": list(TECHNICAL_KEYS),
                 "technical_metrics_version": TECHNICAL_METRICS_VERSION,
@@ -233,6 +239,8 @@ def build_records(
                 "fundamentals_snapshot_date": fundamentals_snapshot_date,
                 "fundamentals_match_mode": cohort_match_mode,
                 "fundamentals_match_by_stock": fundamentals_match_by_stock,
+                "market": market,
+                "currency": currency,
             },
         }
         records.append(record)

@@ -106,7 +106,14 @@ def load_rows(path: Path) -> list[dict[str, str]]:
         return list(reader)
 
 
-def build_record(row: dict[str, str], template: str, source_name: str) -> dict[str, Any]:
+def build_record(
+    row: dict[str, str],
+    template: str,
+    source_name: str,
+    *,
+    market: str = "CN_A",
+    currency: str = "CNY",
+) -> dict[str, Any]:
     """Build one B ready record from a CSV row."""
     subtype = row["event_subtype"].strip()
     variant = SUBTYPE_TO_VARIANT[subtype]
@@ -121,12 +128,15 @@ def build_record(row: dict[str, str], template: str, source_name: str) -> dict[s
         "event_date": row["event_date"].strip(),
         "event_description": row["event_description"].strip(),
         "cutoff_date": row["cutoff_date"].strip(),
+        "market": market,
+        "currency": currency,
     }
 
     return {
         "task_id": row["event_id"].strip(),
         "category": "B",
         "variant": variant,
+        "cutoff_date": row["cutoff_date"].strip(),
         "time_band": _infer_time_band(row["cutoff_date"].strip()),
         "status": "ready",
         "seed": seed,
@@ -149,7 +159,9 @@ def build_record(row: dict[str, str], template: str, source_name: str) -> dict[s
         "metadata": {
             "source": source_name,
             "is_template": False,
-            "builder_version": "b_event_csv_builder_v1",
+            "builder_version": "b_event_csv_builder_v2",
+            "market": market,
+            "currency": currency,
         },
     }
 

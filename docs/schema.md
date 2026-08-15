@@ -49,9 +49,9 @@
 - `is_template: false` — 可用于 baseline / 正式评测
 - `temporal_split` — ready seeds 必填，用于复现 T1/T2/T3 时间泄漏切分
 
-### `seed` 市场字段（A1 / A2-T）
+### `seed` 市场字段（A1 / A2 / B / C）
 
-价格驱动题型应包含：
+价格与 Yahoo 生成题型应包含：
 
 | 字段 | 类型 | 说明 |
 |------|------|------|

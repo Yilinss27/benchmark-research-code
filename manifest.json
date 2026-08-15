@@ -1,6 +1,6 @@
 {
   "dataset_name": "benchmark-research",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "status": "dataset_release_candidate",
   "license": "cc-by-4.0",
   "hf_repo": "sselaine27/benchmark-research",
@@ -21,15 +21,15 @@
   },
   "counts": {
     "A1_ready": 72,
-    "A2-F_ready": 2,
+    "A2-F_ready": 10,
     "A2-T_ready": 10,
-    "A2-H_ready": 2,
-    "B_ready": 10,
-    "C_ready": 76,
+    "A2-H_ready": 10,
+    "B_ready": 33,
+    "C_ready": 180,
     "D_ready": 12,
     "E_ready": 12,
     "template_records": 10,
-    "total_ready_records": 196
+    "total_ready_records": 339
   },
   "validation": {
     "script": "scripts/validate.py",
@@ -42,8 +42,8 @@
     "reference_current_date": "2026-08-08",
     "rule": "T1: cutoff_date <= model_training_cutoff; T2: model_training_cutoff < cutoff_date < reference_current_date; T3: cutoff_date >= reference_current_date",
     "counts": {
-      "T1": 46,
-      "T2": 146,
+      "T1": 118,
+      "T2": 217,
       "T3": 4
     }
   },
@@ -51,5 +51,5 @@
     "script": "scripts/export_hf_dataset.py",
     "command": "python scripts/export_hf_dataset.py --clean"
   },
-  "notes": "v0.5.0: Adds Yahoo-backed T1/T2 pairing for A1 and A2-T across CN_A/US/HK. GitHub remains code-only; HF remains data-only."
+  "notes": "v0.6.0: Adds Yahoo-backed T1/T2 pairing for A2-F/H, B earnings, and C across CN_A/US/HK, using a reporting lag as a PIT approximation. GitHub remains code-only; HF remains data-only."
 }

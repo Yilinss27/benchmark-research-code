@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate paired T1/T2 A1 and A2-T records across CN_A / US / HK."""
+"""Generate paired T1/T2 records across A1/A2/B/C and CN_A/US/HK."""
 
 from __future__ import annotations
 
@@ -14,23 +14,35 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from src.data_generator import generate
+from src.data_generator import SUPPORTED_TASKS, generate
 
 
 T1_CUTOFF = "2023-12-29"
 T2_CUTOFF = "2026-01-30"
-A1_OUTPUT = "seeds/a1_valuation.jsonl"
-A2T_OUTPUT = "seeds/a2_technical.jsonl"
 DEFAULT_TRAINING_CUTOFF = "2024-06-01"
 DEFAULT_CURRENT_DATE = "2026-08-08"
+
+TASK_OUTPUTS = {
+    "A1": "seeds/a1_valuation.jsonl",
+    "A2-T": "seeds/a2_technical.jsonl",
+    "A2-F": "seeds/a2_fundamentals.jsonl",
+    "A2-H": "seeds/a2_hybrid.jsonl",
+    "B": "seeds/b_event.jsonl",
+    "C": "seeds/c_financial_metric.jsonl",
+}
 
 
 def parse_args() -> argparse.Namespace:
     """Parse CLI arguments."""
-    parser = argparse.ArgumentParser(description="Generate paired T1/T2 A1 and A2-T seeds.")
+    parser = argparse.ArgumentParser(description="Generate paired T1/T2 seeds across tasks and markets.")
     parser.add_argument("--t1-cutoff", default=T1_CUTOFF, help="T1 cutoff date.")
     parser.add_argument("--t2-cutoff", default=T2_CUTOFF, help="T2 cutoff date.")
     parser.add_argument("--provider", default="yahoo", help="Price provider.")
+    parser.add_argument(
+        "--tasks",
+        default=",".join(SUPPORTED_TASKS),
+        help="Comma-separated tasks to generate.",
+    )
     parser.add_argument(
         "--training-cutoff",
         default=DEFAULT_TRAINING_CUTOFF,
@@ -76,29 +88,42 @@ def backfill_legacy_market(path: Path, default_market: str = "CN_A", default_cur
             metadata["market"] = seed["market"]
         if not metadata.get("currency"):
             metadata["currency"] = seed["currency"]
+        if row.get("category") in {"A1", "A2", "B", "C"} and not row.get("cutoff_date"):
+            cutoff = seed.get("cutoff_date") or seed.get("event_date")
+            if cutoff:
+                row["cutoff_date"] = cutoff
+                changed += 1
     if changed:
         _write_jsonl(path, rows)
     return changed
 
 
+def _parse_tasks(raw: str) -> list[str]:
+    """Parse and validate the --tasks flag."""
+    tasks = [item.strip() for item in raw.split(",") if item.strip()]
+    unknown = [task for task in tasks if task not in TASK_OUTPUTS]
+    if unknown:
+        raise ValueError(f"Unsupported tasks: {unknown}. Choose from {list(TASK_OUTPUTS)}")
+    return tasks
+
+
 def main() -> int:
     """Generate T1/T2 pairs, assign time bands, and validate."""
     args = parse_args()
+    tasks = _parse_tasks(args.tasks)
     root = ROOT
-    a1_path = root / A1_OUTPUT
-    a2_path = root / A2T_OUTPUT
 
-    backfilled = {
-        A1_OUTPUT: backfill_legacy_market(a1_path),
-        A2T_OUTPUT: backfill_legacy_market(a2_path),
-    }
+    backfilled: dict[str, int] = {}
+    for task in tasks:
+        rel = TASK_OUTPUTS[task]
+        backfilled[rel] = backfill_legacy_market(root / rel)
 
-    jobs = []
+    jobs: list[tuple[str, str, str, Path]] = []
     for cutoff in (args.t1_cutoff, args.t2_cutoff):
-        for market in ("CN_A", "US", "HK"):
-            jobs.append(("A1", market, cutoff, a1_path))
-        for market in ("CN_A", "US", "HK"):
-            jobs.append(("A2-T", market, cutoff, a2_path))
+        for task in tasks:
+            output = root / TASK_OUTPUTS[task]
+            for market in ("CN_A", "US", "HK"):
+                jobs.append((task, market, cutoff, output))
 
     summaries: list[dict[str, Any]] = []
     for task, market, cutoff, output in jobs:
@@ -139,7 +164,17 @@ def main() -> int:
 
     report = {
         "backfilled_fields": backfilled,
-        "jobs": summaries,
+        "jobs": [
+            {
+                "task": item["task"],
+                "market": item["market"],
+                "cutoff_date": item["cutoff_date"],
+                "generated": item["generated"],
+                "added": item["added"],
+                "warning_count": len(item["warnings"]),
+            }
+            for item in summaries
+        ],
         "added_total": sum(item["added"] for item in summaries),
         "assign_time_bands_exit": assign.returncode,
         "validate_exit": validate_code,

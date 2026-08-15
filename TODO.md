@@ -1,6 +1,6 @@
 # TODO
 
-v0.5.0 之后仍待补充。
+v0.6.0 之后仍待补充。
 
 ## 数据扩量
 
@@ -8,24 +8,25 @@ v0.5.0 之后仍待补充。
 
 - [x] Yahoo 路径下为现有 A1/A2-T 股票池补 T1/T2 配对（见 `scripts/generate_t1_t2_pairs.py`）
 - [ ] 扩充 `data/a1_price_snapshots.csv` 后重跑 A1 builder（CSV 路径仍可用）
-- [ ] 新增 A2-F/H cohort + 对应 fundamentals 后重跑 A2-F/H
-- [ ] 补齐 cutoff 前 fundamentals，去掉 `prototype_fallback_nearest`
+- [x] 为 A2-F/H 补 Yahoo T1/T2 配对（含 US/HK 最小集；报告滞后期近似 PIT）
+- [ ] 补齐 cutoff 前 vendor PIT fundamentals，去掉旧 CSV 的 `prototype_fallback_nearest`
 
 ## Data Interface (Yahoo MVP)
 
-Price-driven A1 / A2-T generation now goes through `src.data_generator` and `src.data.providers.yahoo`. Yahoo cache lives in `data/cache/yahoo/` and is not published.
+Price-driven A1 / A2-T and lagged Yahoo A2-F / A2-H / B-earnings / C generation go through `src.data_generator` and `src.data.providers.yahoo`. Yahoo cache lives in `data/cache/yahoo/` and is not published.
 
 This round:
 
 - [x] 统一行情接口：`get_price_history` / `get_close_on_or_before` / `get_forward_close`
 - [x] Yahoo provider + ticker 映射（`CN_A` / `US` / `HK`）+ 本地 JSON cache
-- [x] `python -m src.data_generator --task A1|A2-T --market ... --cutoff-date ...`
+- [x] `python -m src.data_generator --task A1|A2-T|A2-F|A2-H|B|C --market ... --cutoff-date ...`
 - [x] seed 增加 `market` / `currency`；A1 prompt 按货币单位渲染
 - [x] 为 A1/A2-T 补配对 T1（2023-12-29）与 T2（2026-01-30）；US/HK 最小股票池
-- [ ] 设计统一财务接口：`get_fundamentals(symbol, as_of_date, market)`（Yahoo 非 PIT，本轮不做）
-- [ ] 设计统一事件接口：`get_events(...)`（Yahoo news 不稳定，本轮不做）
-- [ ] 用 Yahoo 硬造 A2-F / A2-H / C
+- [x] Yahoo 滞后期财务接口（季报 +45 / 年报 +100），用于 A2-F / A2-H / C
+- [x] Yahoo earnings dates 用于 B 财报题（非新闻接口）
+- [ ] 真正的 vendor PIT fundamentals / events
 - [ ] 大规模美股/港股题库
+- [ ] B macro 扩量
 - [ ] 真实 T3（未来标签未实现）
 
 Yahoo 边界：非官方接口、有限流；A 股财务/事件质量差；365 日窗口若尚未实现则标签为 null。

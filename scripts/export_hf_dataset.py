@@ -100,7 +100,7 @@ t2 = a1["train"].filter(lambda x: x["time_band"] == "T2")
 可用 config：`a1` / `a2_f` / `a2_t` / `a2_h` / `b` / `c` / `d` / `e`  
 默认 config 为 `a1`。
 
-## 规模（v0.5.0）
+## 规模（v0.6.0）
 
 | config | ready 条数 |
 |--------|-----------|

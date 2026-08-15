@@ -55,9 +55,9 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 
 | Variant | 信号 | Ready 文件 | Template 样例 |
 |---------|------|------------|---------------|
-| F | 仅财务基本面 | `seeds/a2_fundamentals.jsonl`（2 条） | `seeds/templates/a2_fundamentals_template.jsonl` |
+| F | 仅财务基本面 | `seeds/a2_fundamentals.jsonl` | `seeds/templates/a2_fundamentals_template.jsonl` |
 | T | 仅技术指标 | `seeds/a2_technical.jsonl` | `seeds/templates/a2_technical_template.jsonl` |
-| H | 基本面 + 技术 | `seeds/a2_hybrid.jsonl`（2 条） | `seeds/templates/a2_hybrid_template.jsonl` |
+| H | 基本面 + 技术 | `seeds/a2_hybrid.jsonl` | `seeds/templates/a2_hybrid_template.jsonl` |
 
 **本地数据文件（`data/`）**
 
@@ -93,7 +93,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 | `cutoff_date` | `str` | 信息截止日期 |
 | `prediction_window_days` | `int` | 预测窗口（交易日） |
 | `signal_variant` | `str` | `F` / `T` / `H` |
-| `market` | `str` | `CN_A` / `US` / `HK`（A2-T Yahoo 生成记录） |
+| `market` | `str` | `CN_A` / `US` / `HK` |
 | `currency` | `str` | `CNY` / `USD` / `HKD` |
 | `fundamentals_dict` | `dict` | F/H 变体提供 |
 | `technical_dict` | `dict` | T/H 变体提供 |
@@ -113,7 +113,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - Top-K Hit Rate（K = floor(N/3)）
 - Long-Short Spread
 
-**当前实现状态**：ready（`seeds/a2_fundamentals.jsonl`、`seeds/a2_technical.jsonl`、`seeds/a2_hybrid.jsonl`）。A2-T 可用 `data_generator` 按市场/cutoff 配对生成；A2-F/H 本轮不走 Yahoo（财务非 point-in-time）。
+**当前实现状态**：ready（`seeds/a2_fundamentals.jsonl`、`seeds/a2_technical.jsonl`、`seeds/a2_hybrid.jsonl`）。A2-F/T/H 均可由 `data_generator` 按市场/cutoff 配对生成。Yahoo 财务使用报告滞后期（季报 +45 天、年报 +100 天）近似 PIT；季报窗口不足时回退年报。CSV 路径仍可用于旧 cohort。
 
 ---
 
@@ -141,6 +141,8 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 | `cutoff_date` | `str` | 信息截止日期 |
 | `stock_code` | `str` | 股票代码 |
 | `stock_name` | `str` | 股票名称 |
+| `market` | `str` | `CN_A` / `US` / `HK` |
+| `currency` | `str` | `CNY` / `USD` / `HKD` |
 
 **输出格式**
 
@@ -159,7 +161,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - Directional Accuracy
 - Brier Score
 
-**当前实现状态**：builder / parser / evaluator 已接通；当前 `data/b_events.csv` 为空，尚无 ready records；`policy` 等子类待补
+**当前实现状态**：ready。保留原 CSV 的 earnings/macro 题；Yahoo 路径为 CN_A/US/HK 补 T1/T2 财报事件（`cutoff_date = event_date`，收益用事件日前收盘到下一交易日收盘）。macro 大规模扩充仍待补。
 
 ---
 
@@ -181,6 +183,8 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 | `report_period_historical` | `str` | 历史报告期 |
 | `historical_value` | `float` | 历史指标值 |
 | `report_period_future` | `str` | 目标报告期 |
+| `market` | `str` | `CN_A` / `US` / `HK` |
+| `currency` | `str` | `CNY` / `USD` / `HKD` |
 
 **输出格式**
 
@@ -198,7 +202,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - MAPE
 - within_10pct（MAPE ≤ 10%）
 
-**当前实现状态**：builder 可从 CSV 批量生成 ready/template seeds
+**当前实现状态**：builder 可从 CSV 批量生成 ready/template seeds；`data_generator` 可用 Yahoo 财报为 A1 股票池补 T1/T2 与 US/HK。T1 因 Yahoo 季报窗口短，通常回退到相邻年报。
 
 ---
 

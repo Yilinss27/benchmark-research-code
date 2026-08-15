@@ -32,16 +32,16 @@ The codebase supports three workflows:
 2. Run LLM / agent baselines on ready records.
 3. Export a data-only Hugging Face package.
 
-The current public dataset contains 196 ready records:
+The current public dataset contains 339 ready records:
 
 | Task | Description | HF config | Ready |
 |------|-------------|-----------|------:|
 | A1 | Single-stock valuation range prediction | `a1` | 72 |
-| A2-F | Cross-sectional ranking with fundamentals | `a2_f` | 2 |
+| A2-F | Cross-sectional ranking with fundamentals | `a2_f` | 10 |
 | A2-T | Cross-sectional ranking with technicals | `a2_t` | 10 |
-| A2-H | Cross-sectional ranking with hybrid signals | `a2_h` | 2 |
-| B | Event-driven direction prediction | `b` | 10 |
-| C | Forward financial metric prediction | `c` | 76 |
+| A2-H | Cross-sectional ranking with hybrid signals | `a2_h` | 10 |
+| B | Event-driven direction prediction | `b` | 33 |
+| C | Forward financial metric prediction | `c` | 180 |
 | D | Counterfactual event reasoning | `d` | 12 |
 | E | Multi-step financial formula calculation | `e` | 12 |
 
@@ -122,15 +122,15 @@ Rules:
 - `T2`: `model_training_cutoff < cutoff_date < reference_current_date`
 - `T3`: `cutoff_date >= reference_current_date`
 
-Published Hugging Face distribution (v0.5.0, 196 records):
+Published Hugging Face distribution (v0.6.0, 339 records):
 
 | Time Band | Count | Notes |
 |-----------|------:|-------|
-| T1 | 46 | Includes A1/A2-T pairs at `2023-12-29`, plus formula and synthetic D |
-| T2 | 146 | Includes legacy `2025-06-06` rows and A1/A2-T pairs at `2026-01-30` |
+| T1 | 118 | Includes A1/A2/B/C pairs around `2023-12-29`, plus formula and synthetic D |
+| T2 | 217 | Includes legacy CSV rows and Yahoo pairs around `2026-01-30` |
 | T3 | 4 | Synthetic future counterfactuals; real T3 labels need future data |
 
-A1 records for `2026-01-30` leave the 365-day window as null because that date is not realized yet. A2-F/H, B, and C are still mostly a single T2 cutoff.
+A1 records for `2026-01-30` leave the 365-day window as null because that date is not realized yet. A2-F/H, B (earnings), and C now have Yahoo-backed T1/T2 pairs on CN_A / US / HK in addition to the older CSV rows.
 
 For a model with a different training cutoff, recompute the split:
 
@@ -198,10 +198,10 @@ python -m src.data_generator \
 
 Supported this round:
 
-- `--task A1 | A2-T`
+- `--task A1 | A2-T | A2-F | A2-H | B | C`
 - `--market CN_A | US | HK`
 
-To fill paired cutoffs for the default universes (T1 `2023-12-29`, T2 `2026-01-30`) and keep existing `2025-06-06` records:
+To fill paired cutoffs for the default universes (T1 `2023-12-29`, T2 `2026-01-30`) and keep existing legacy records:
 
 ```bash
 python scripts/generate_t1_t2_pairs.py
@@ -215,9 +215,9 @@ Yahoo ticker mapping:
 | `US` | `AAPL` | `AAPL` |
 | `HK` | `0700` | `0700.HK` |
 
-Daily closes are cached under `data/cache/yahoo/` (gitignored). Yahoo is treated as unofficial: rate limits apply, A-share fundamentals/events are not used, and point-in-time financials are not assumed.
+Daily closes, statements, and earnings dates are cached under `data/cache/yahoo/` (gitignored). Yahoo is unofficial and not a true point-in-time fundamentals feed. This round approximates filing availability with a reporting lag: quarterly statements are treated as public 45 calendar days after period end, annual statements after 100 days. Yahoo quarterly history is short (~5 periods), so T1 A2-F/H/C usually fall back to annual statements.
 
-Out of scope this round: A2-F, A2-H, C, large B, and real T3 labels (future prices are not realized yet).
+Out of scope this round: real T3 labels (future prices are not realized yet) and a large B macro set.
 
 ## Temporal Leakage Papers
 
@@ -273,12 +273,7 @@ results/     # benchmark outputs
 
 ## Future Data Interface Plan
 
-A1 and A2-T now have a Yahoo Finance MVP (`python -m src.data_generator`). Remaining work is point-in-time fundamentals and events, which Yahoo does not provide reliably:
-
-- `get_fundamentals(symbol, as_of_date, market)`
-- `get_events(symbol_or_index, start_date, end_date, market)`
-
-Candidate providers for those interfaces are tracked in [`TODO.md`](TODO.md).
+A1 / A2 / B (earnings) / C can be generated from Yahoo Finance (`python -m src.data_generator`). Yahoo financials are lagged, not a vendor PIT tape; B macro events and true T3 labels are still out of scope. Candidate paid PIT providers are tracked in [`TODO.md`](TODO.md).
 
 ## License
 
