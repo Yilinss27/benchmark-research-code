@@ -21,15 +21,15 @@
   },
   "counts": {
     "A1_ready": 228,
-    "A2-F_ready": 110,
-    "A2-T_ready": 173,
-    "A2-H_ready": 110,
+    "A2-F_ready": 106,
+    "A2-T_ready": 169,
+    "A2-H_ready": 104,
     "B_ready": 68,
-    "C_ready": 180,
+    "C_ready": 176,
     "D_ready": 12,
     "E_ready": 12,
     "template_records": 94,
-    "total_ready_records": 893
+    "total_ready_records": 875
   },
   "paper_temporal": {
     "index": "data/task_temporal_index.jsonl",
@@ -41,7 +41,7 @@
     "counts": {
       "T1": 404,
       "T2": 447,
-      "quarantine": 18,
+      "quarantine": 0,
       "D": 12,
       "E": 12
     }
@@ -71,5 +71,5 @@
     "file": "calibration/leakage_probe_v1.json",
     "manifest": "calibration/leakage_probe_manifest.json"
   },
-  "notes": "v0.7.0: Adds paper temporal index (forecast_origin/outcome_available_at), expands paired paper T1/T2 data, T3 forward templates, leakage calibration scaffold, and official T2 task-equal scoring."
+  "notes": "v0.7.0: Paper temporal index, expanded A2 cohorts (T1>=30 for A2-F/H), quarantine records removed, T3 forward templates, leakage calibration scaffold, official T2 task-equal scoring."
 }
