@@ -75,6 +75,43 @@ A1 prompt 使用 `{currency_unit}`（`元` / `USD` / `HKD`），避免美股/港
 
 注意：严格来说，T1/T2 取决于具体模型的训练截止日期。评测不同模型时，应使用 `scripts/assign_time_bands.py` 按该模型训练截止日重新计算。
 
+## 论文时间几何（paper_band）
+
+论文实验**不得**直接使用 legacy `time_band`。应使用侧车文件 `data/task_temporal_index.jsonl`（由 `scripts/classify_paper_temporal.py` 生成），字段包括：
+
+| 字段 | 说明 |
+|------|------|
+| `forecast_origin` | 预测锁定时点（日精度） |
+| `outcome_available_at` | 结果首次完整公开日；T3 前瞻题可为 `pending` |
+| `paper_band` | `T1` / `T2` / `T3` / `quarantine` / `D` / `E` |
+| `review_status` | `draft` / `reviewed` |
+| `quality_flags` | 如 `fundamentals_after_origin` |
+
+默认论文参数（`gpt-4.1` backbone）：
+
+- `backbone_training_cutoff = 2024-06-01`
+- `guard_days = 30`
+- `experiment_as_of = 2026-08-17`
+
+分类规则：
+
+- `T1`：`outcome_available_at <= 2024-05-02`
+- `T2`：`forecast_origin >= 2024-07-01` 且 `outcome_available_at <= 2026-07-18`
+- `T3`：`forecast_origin >= 2026-08-17`
+- `quarantine`：其余 A1–C
+
+Runner 用法：
+
+```bash
+python -m src.run_benchmark \
+  --seed seeds/a1_valuation.jsonl \
+  --temporal-index data/task_temporal_index.jsonl \
+  --paper-band T2 \
+  --agent mock
+```
+
+官方分（任务等权、仅 T2）见 `metrics_summary.json` 中的 `official_score`。
+
 ## `status` 枚举
 
 | 值 | 含义 | 用途 |

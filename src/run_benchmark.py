@@ -20,7 +20,8 @@ from src.evaluators.b_evaluator import evaluate_b
 from src.evaluators.c_evaluator import evaluate_c
 from src.evaluators.d_evaluator import evaluate_d
 from src.evaluators.e_evaluator import evaluate_e
-from src.load_seeds import filter_records, load_jsonl
+from src.evaluators.official_score import aggregate_official_score
+from src.load_seeds import attach_temporal_index, filter_paper_band, filter_records, load_jsonl
 from src.parsers.a1_parser import parse_a1_response
 from src.parsers.a2_parser import parse_a2_response
 from src.parsers.b_parser import parse_b_response
@@ -58,7 +59,23 @@ def parse_args() -> argparse.Namespace:
         "--time-band",
         choices=["T1", "T2", "T3"],
         default=None,
-        help="Optional temporal split filter after recomputing time bands.",
+        help="Optional legacy temporal split filter after recomputing time bands.",
+    )
+    parser.add_argument(
+        "--temporal-index",
+        default=None,
+        help="Optional task-temporal-index JSONL for paper_band filtering.",
+    )
+    parser.add_argument(
+        "--paper-band",
+        choices=["T1", "T2", "T3", "quarantine", "D", "E"],
+        default=None,
+        help="Filter by paper_band from --temporal-index.",
+    )
+    parser.add_argument(
+        "--exclude-quarantine",
+        action="store_true",
+        help="Exclude quarantine records when --temporal-index is set.",
     )
     parser.add_argument(
         "--continue-on-error",
@@ -162,6 +179,11 @@ def _summarize_time_band(predictions: list[dict[str, Any]]) -> dict[str, Any]:
         "e_exact_match_0_2pct_rate": _rate([metrics.get("exact_match_0_2pct") for metrics in metrics_list]),
         "e_mean_relative_error": _mean_metric(metrics_list, "relative_error"),
     }
+
+
+def _summarize_paper_band(predictions: list[dict[str, Any]]) -> dict[str, Any]:
+    """Summarize common metrics for one paper temporal band."""
+    return _summarize_time_band(predictions)
 
 
 def summarize_results(
@@ -378,6 +400,14 @@ def summarize_results(
         for time_band in sorted({prediction.get("time_band") for prediction in predictions})
     }
 
+    by_paper_band = {
+        str(paper_band): _summarize_paper_band(
+            [prediction for prediction in predictions if prediction.get("paper_band") == paper_band]
+        )
+        for paper_band in sorted({prediction.get("paper_band") for prediction in predictions if prediction.get("paper_band")})
+    }
+    official = aggregate_official_score(predictions, paper_band="T2")
+
     return {
         "agent": agent,
         "model": model,
@@ -390,6 +420,8 @@ def summarize_results(
         "total_latency_seconds": sum(latencies) if latencies else 0.0,
         "mean_latency_seconds": mean(latencies) if latencies else None,
         "by_time_band": by_time_band,
+        "by_paper_band": by_paper_band,
+        "official_score": official,
         "by_category": by_category,
     }
 
@@ -471,6 +503,13 @@ def main() -> int:
 
     records = load_jsonl(args.seed)
     records = maybe_recompute_temporal_bands(records, args)
+    if args.temporal_index:
+        records = attach_temporal_index(records, args.temporal_index)
+        records = filter_paper_band(
+            records,
+            paper_band=args.paper_band,
+            exclude_quarantine=args.exclude_quarantine,
+        )
     records = filter_records(records, category=args.category, status=None)
     if args.time_band is not None:
         records = [record for record in records if record.get("time_band") == args.time_band]
@@ -558,6 +597,8 @@ def main() -> int:
                 "variant": record.get("variant"),
                 "cutoff_date": record.get("cutoff_date"),
                 "time_band": record.get("time_band"),
+                "paper_band": record.get("paper_band"),
+                "paper_temporal": record.get("paper_temporal"),
                 "temporal_split": record.get("metadata", {}).get("temporal_split"),
                 "agent": args.agent,
                 "model": args.model,
@@ -604,6 +645,9 @@ def main() -> int:
         "model_training_cutoff": args.model_training_cutoff,
         "current_date": args.current_date,
         "time_band": args.time_band,
+        "temporal_index": args.temporal_index,
+        "paper_band": args.paper_band,
+        "exclude_quarantine": args.exclude_quarantine,
         "continue_on_error": args.continue_on_error,
         "output": str(output_dir),
     }

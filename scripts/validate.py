@@ -48,6 +48,42 @@ READY_FILES = [
 
 TEMPLATE_GLOB = "seeds/templates/*.jsonl"
 TIME_BANDS = {"T1", "T2", "T3"}
+PAPER_BANDS = {"T1", "T2", "T3", "quarantine", "D", "E"}
+TEMPORAL_INDEX_DEFAULT = "data/task_temporal_index.jsonl"
+
+
+def validate_temporal_index(root: Path, index_path: Path, seed_task_ids: set[str]) -> list[str]:
+    """Validate task-temporal-index rows against ready seeds."""
+    errors: list[str] = []
+    if not index_path.exists():
+        errors.append(f"Missing temporal index: {index_path.relative_to(root)}")
+        return errors
+
+    index_ids: set[str] = set()
+    for i, row in enumerate(load_jsonl(index_path), 1):
+        prefix = f"{index_path.relative_to(root)}:{i}"
+        for key in (
+            "task_id",
+            "category",
+            "hf_config",
+            "forecast_origin",
+            "outcome_available_at",
+            "paper_band",
+            "review_status",
+        ):
+            if not row.get(key):
+                errors.append(f"{prefix} missing {key}")
+        if row.get("paper_band") not in PAPER_BANDS:
+            errors.append(f"{prefix} invalid paper_band: {row.get('paper_band')}")
+        if row.get("review_status") == "reviewed":
+            if not row.get("outcome_evidence_code") and not row.get("outcome_evidence_url"):
+                errors.append(f"{prefix} reviewed row missing outcome evidence")
+        index_ids.add(row["task_id"])
+
+    missing = sorted(seed_task_ids - index_ids)
+    if missing:
+        errors.append(f"Temporal index missing task_ids: {missing[:10]}{'...' if len(missing) > 10 else ''}")
+    return errors
 
 
 def load_jsonl(path: Path) -> list[dict]:
@@ -69,6 +105,7 @@ def validate() -> list[str]:
     errors: list[str] = []
     root = Path(__file__).resolve().parents[1]
     task_ids: list[str] = []
+    ready_task_ids: set[str] = set()
 
     for rel in REQUIRED_PATHS:
         if not (root / rel).exists():
@@ -141,6 +178,7 @@ def validate() -> list[str]:
                 errors.append(f"{prefix} ground_truth must not be null")
             if row["category"] == "E" and row["ground_truth"].get("correct_answer") is None:
                 errors.append(f"{prefix} E ground_truth.correct_answer must be float")
+            ready_task_ids.add(row["task_id"])
 
     for path in sorted(root.glob(TEMPLATE_GLOB)):
         rel = path.relative_to(root).as_posix()
@@ -150,6 +188,14 @@ def validate() -> list[str]:
                 errors.append(f"{prefix} status must be template")
             if row["metadata"].get("is_template") is not True:
                 errors.append(f"{prefix} metadata.is_template must be true")
+
+    errors.extend(
+        validate_temporal_index(
+            root,
+            root / TEMPORAL_INDEX_DEFAULT,
+            ready_task_ids,
+        )
+    )
 
     return errors
 

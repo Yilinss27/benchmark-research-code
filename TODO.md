@@ -1,6 +1,16 @@
 # TODO
 
-v0.6.0 之后仍待补充。
+v0.7.0 之后仍待补充。
+
+## 论文时间几何（paper_band）
+
+- [x] `data/task_temporal_index.jsonl` + `scripts/classify_paper_temporal.py`
+- [x] Runner `--temporal-index` / `--paper-band` + `official_score`（任务等权、仅 T2）
+- [x] `docs/temporal_changelog.md`
+- [x] 扩 A1 论文 T1、A2-T 双带 ≥30、B earnings 扩池
+- [ ] A2-F/H 论文 T1 扩至 ≥30（当前约 13，受 cohort/Yahoo 限制）
+- [x] T3 前瞻模板 `seeds/t3_forward.jsonl`（84 条 pending）
+- [x] 泄漏校准脚手架 `calibration/leakage_probe_v1.json` + SHA manifest
 
 ## 数据扩量
 

@@ -1,0 +1,8 @@
+{
+  "package": "leakage_probe_v1",
+  "calibration_file": "calibration/leakage_probe_v1.json",
+  "calibration_sha256": "97044cb5e15b7f975e396af9558bea0434fb5b5f08566d71e163a02e244719c3",
+  "record_count": 3,
+  "review_status": "draft",
+  "notes": "Independent calibration set for cutoff vs unrestricted experiments."
+}

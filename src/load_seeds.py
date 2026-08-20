@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from src.temporal.paper_bands import load_temporal_index, merge_index_by_task_id
+
 
 def load_jsonl(path: str | Path) -> list[dict[str, Any]]:
     """Load a JSONL file into a list of dictionaries."""
@@ -38,4 +40,32 @@ def filter_records(
         filtered = [record for record in filtered if record.get("category") == category]
     if status is not None:
         filtered = [record for record in filtered if record.get("status") == status]
+    return filtered
+
+
+def attach_temporal_index(
+    records: list[dict[str, Any]],
+    index_path: str | Path,
+) -> list[dict[str, Any]]:
+    """Attach paper temporal fields from a task-temporal-index file."""
+    index = load_temporal_index(index_path)
+    return merge_index_by_task_id(records, index)
+
+
+def filter_paper_band(
+    records: list[dict[str, Any]],
+    paper_band: str | None = None,
+    *,
+    exclude_quarantine: bool = False,
+) -> list[dict[str, Any]]:
+    """Filter records by paper_band attached via attach_temporal_index."""
+    filtered = records
+    if exclude_quarantine:
+        filtered = [
+            record
+            for record in filtered
+            if record.get("paper_band") not in {None, "quarantine"}
+        ]
+    if paper_band is not None:
+        filtered = [record for record in filtered if record.get("paper_band") == paper_band]
     return filtered

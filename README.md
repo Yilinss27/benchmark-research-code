@@ -207,6 +207,25 @@ To fill paired cutoffs for the default universes (T1 `2023-12-29`, T2 `2026-01-3
 python scripts/generate_t1_t2_pairs.py
 ```
 
+### Paper temporal index (do not use legacy `time_band` for papers)
+
+```bash
+python scripts/classify_paper_temporal.py --enrich-yahoo
+python scripts/expand_paper_data.py --all   # optional: expand A1/A2/B and T3 templates
+```
+
+Runner with official T2 filter:
+
+```bash
+python -m src.run_benchmark \
+  --seed seeds/a1_valuation.jsonl \
+  --temporal-index data/task_temporal_index.jsonl \
+  --paper-band T2 \
+  --agent mock
+```
+
+See [`docs/temporal_changelog.md`](docs/temporal_changelog.md) for paper_band counts.
+
 Yahoo ticker mapping:
 
 | Market | Example | Yahoo ticker |

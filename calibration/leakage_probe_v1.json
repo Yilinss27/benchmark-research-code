@@ -1,0 +1,41 @@
+[
+  {
+    "calibration_id": "leakage_probe_v1_00001",
+    "task_category": "A1",
+    "query": "贵州茅台 600519 2023-12-29 估值区间",
+    "cutoff_date": "2023-12-29",
+    "retrieved_url": "https://example.com/finance/600519-2024-outlook",
+    "retrieved_title": "Example outlook published 2024-03-01",
+    "retrieved_observed_date": "2024-03-01",
+    "human_label": "filter",
+    "label_rationale": "Published after cutoff; should be filtered in cutoff-controlled mode.",
+    "annotator_count": 2,
+    "review_status": "draft"
+  },
+  {
+    "calibration_id": "leakage_probe_v1_00002",
+    "task_category": "B",
+    "query": "Apple AAPL earnings surprise 2024-01-30",
+    "cutoff_date": "2024-01-30",
+    "retrieved_url": "https://example.com/news/aapl-earnings-2024-01-30",
+    "retrieved_title": "AAPL earnings release same day",
+    "retrieved_observed_date": "2024-01-30",
+    "human_label": "keep",
+    "label_rationale": "Same-day public release; acceptable at event cutoff.",
+    "annotator_count": 2,
+    "review_status": "draft"
+  },
+  {
+    "calibration_id": "leakage_probe_v1_00003",
+    "task_category": "C",
+    "query": "Tencent 0700 next quarter revenue forecast",
+    "cutoff_date": "2023-12-29",
+    "retrieved_url": "https://example.com/hk/0700-2024-q1-results",
+    "retrieved_title": "Q1 2024 results published 2024-05-14",
+    "retrieved_observed_date": "2024-05-14",
+    "human_label": "filter",
+    "label_rationale": "Contains future-period realized results beyond cutoff.",
+    "annotator_count": 2,
+    "review_status": "draft"
+  }
+]

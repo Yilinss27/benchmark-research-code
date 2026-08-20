@@ -701,8 +701,19 @@ def merge_records(
     existing: list[dict[str, Any]],
     generated: list[dict[str, Any]],
     identity_fn,
+    *,
+    replace: bool = False,
 ) -> tuple[list[dict[str, Any]], int]:
     """Append generated records, skipping duplicate identities and task_ids."""
+    if replace and generated:
+        replace_ids = {record["task_id"] for record in generated}
+        replace_keys = {identity_fn(record) for record in generated}
+        existing = [
+            row
+            for row in existing
+            if row["task_id"] not in replace_ids and identity_fn(row) not in replace_keys
+        ]
+
     seen_ids = {row["task_id"] for row in existing}
     seen_keys = {identity_fn(row) for row in existing}
     added = 0
@@ -736,6 +747,7 @@ def generate(
     provider_name: str = "yahoo",
     output: str | Path,
     append: bool = False,
+    replace: bool = False,
     training_cutoff: str = DEFAULT_TRAINING_CUTOFF,
     current_date: str = DEFAULT_CURRENT_DATE,
 ) -> dict[str, Any]:
@@ -751,7 +763,7 @@ def generate(
     generated = _assign_bands(generated, training_cutoff, current_date)
     output_path = Path(output)
     existing = _load_jsonl(output_path) if append else []
-    merged, added = merge_records(existing, generated, identity_fn)
+    merged, added = merge_records(existing, generated, identity_fn, replace=replace)
     _write_jsonl(output_path, merged)
     return {
         "task": task,
