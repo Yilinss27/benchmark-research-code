@@ -63,6 +63,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--a2-all", action="store_true", help="Expand A2-F/T/H across cutoffs.")
     parser.add_argument("--t3-forward", action="store_true", help="Create forward T3 seed file.")
     parser.add_argument("--b-earnings", action="store_true", help="Expand B earnings across T1/T2 cutoffs.")
+    parser.add_argument(
+        "--aligned-panel",
+        action="store_true",
+        help="Generate configs/aligned_panel_v1 into seeds/aligned (does not touch main seeds).",
+    )
     parser.add_argument("--all", action="store_true", help="Run all expansion steps.")
     return parser.parse_args()
 
@@ -204,6 +209,32 @@ def expand_b_earnings(root: Path) -> dict[str, Any]:
     return {"step": "b_earnings", "jobs": summaries}
 
 
+def expand_aligned_panel(root: Path) -> dict[str, Any]:
+    """Generate the cross-time aligned A1/A2 panel without touching main seeds."""
+    from scripts.generate_aligned_panel import load_config
+    from src.data_generator import generate_panel
+
+    config = load_config(root / "configs/aligned_panel_v1.json")
+    output_dir = root / config["output_dir"]
+    output_dir.mkdir(parents=True, exist_ok=True)
+    jobs = []
+    for cutoff in (config["cutoffs"]["T1"], config["cutoffs"]["T2"]):
+        jobs.append(
+            generate_panel(
+                cutoff,
+                markets=config["markets"],
+                tasks=config["tasks"],
+                horizon_days=int(config["horizon_days"]),
+                provider_name=config.get("provider", "yahoo"),
+                output_dir=output_dir,
+                panel_id=config["panel_id"],
+                append=True,
+                replace=True,
+            )
+        )
+    return {"step": "aligned_panel", "jobs": jobs}
+
+
 def main() -> int:
     """Run selected expansion steps."""
     args = parse_args()
@@ -218,6 +249,8 @@ def main() -> int:
         reports.append(build_t3_forward(root))
     if run_all or args.b_earnings:
         reports.append(expand_b_earnings(root))
+    if args.aligned_panel:
+        reports.append(expand_aligned_panel(root))
     if not reports:
         print("No steps selected. Use --all or individual flags.")
         return 1

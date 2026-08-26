@@ -1,0 +1,32 @@
+{
+  "panel_id": "aligned_v1",
+  "description": "Cross-time aligned A1/A2 panel: same universe, cohorts, tasks, and horizon; only cutoff differs.",
+  "tasks": ["A1", "A2-F", "A2-T", "A2-H"],
+  "markets": ["CN_A", "US", "HK"],
+  "cutoffs": {
+    "T1": "2023-12-29",
+    "T2": "2025-12-31"
+  },
+  "horizon_days": 30,
+  "provider": "yahoo",
+  "universe_source": "src.data.universe.A1_UNIVERSE",
+  "cohort_source": "src.data.universe.A2_T_COHORTS",
+  "output_dir": "seeds/aligned",
+  "outputs": {
+    "A1": "seeds/aligned/a1_valuation.jsonl",
+    "A2-F": "seeds/aligned/a2_fundamentals.jsonl",
+    "A2-T": "seeds/aligned/a2_technical.jsonl",
+    "A2-H": "seeds/aligned/a2_hybrid.jsonl"
+  },
+  "temporal_index": "data/aligned_task_temporal_index.jsonl",
+  "temporal_report": "data/aligned_paper_temporal_report.json",
+  "symmetry": {
+    "max_count_diff_per_cell": 2,
+    "require_same_cohort_keys": true
+  },
+  "notes": [
+    "Does not modify the main 875-record seed library.",
+    "B/C deferred to a later panel version.",
+    "Switching cutoff only requires regenerate with the same config."
+  ]
+}

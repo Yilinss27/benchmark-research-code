@@ -50,12 +50,48 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate A1 / A2 / B / C seeds for a market and cutoff date.",
     )
-    parser.add_argument("--task", required=True, choices=SUPPORTED_TASKS, help="Task type.")
-    parser.add_argument("--market", required=True, choices=SUPPORTED_MARKETS, help="Market universe.")
+    parser.add_argument(
+        "--panel",
+        action="store_true",
+        help="Generate a full task panel for one cutoff (all markets/tasks).",
+    )
+    parser.add_argument("--task", default=None, choices=SUPPORTED_TASKS, help="Task type (single-task mode).")
+    parser.add_argument("--market", default=None, choices=SUPPORTED_MARKETS, help="Market (single-task mode).")
     parser.add_argument("--cutoff-date", required=True, help="Information cutoff date YYYY-MM-DD.")
+    parser.add_argument(
+        "--markets",
+        default="CN_A,US,HK",
+        help="Comma-separated markets for --panel (default: CN_A,US,HK).",
+    )
+    parser.add_argument(
+        "--tasks",
+        default="A1,A2-F,A2-T,A2-H",
+        help="Comma-separated tasks for --panel (default: A1,A2-F,A2-T,A2-H).",
+    )
+    parser.add_argument(
+        "--horizon",
+        type=int,
+        default=A2_PREDICTION_WINDOW_DAYS,
+        help="Prediction / outcome horizon in calendar days (default: 30).",
+    )
+    parser.add_argument(
+        "--panel-id",
+        default=None,
+        help="Optional panel tag written into metadata.panel.",
+    )
+    parser.add_argument(
+        "--output-dir",
+        default=None,
+        help="Output directory for --panel mode (writes per-task JSONL files).",
+    )
     parser.add_argument("--provider", default="yahoo", choices=("yahoo",), help="Price provider.")
-    parser.add_argument("--output", required=True, help="Output JSONL path.")
+    parser.add_argument("--output", default=None, help="Output JSONL path (single-task mode).")
     parser.add_argument("--append", action="store_true", help="Append to existing output; skip duplicates.")
+    parser.add_argument(
+        "--replace",
+        action="store_true",
+        help="When appending, replace matching identities with newly generated rows.",
+    )
     parser.add_argument(
         "--training-cutoff",
         default=DEFAULT_TRAINING_CUTOFF,
@@ -234,8 +270,10 @@ def _collect_a2_price_stocks(
     cutoff_date: str,
     provider: PriceProvider,
     task_label: str,
+    *,
+    prediction_window_days: int = A2_PREDICTION_WINDOW_DAYS,
 ) -> tuple[dict[str, dict[str, Any]], list[str], list[str]]:
-    """Collect usable A2 cohort stocks with lookback prices and 30d forward returns."""
+    """Collect usable A2 cohort stocks with lookback prices and forward returns."""
     stocks: dict[str, dict[str, Any]] = {}
     skipped: list[str] = []
     warnings: list[str] = []
@@ -249,7 +287,7 @@ def _collect_a2_price_stocks(
                 code,
                 market,
                 cutoff_date,
-                A2_PREDICTION_WINDOW_DAYS,
+                prediction_window_days,
             )
             bars = _lookback_bars(provider, code, market, cutoff_date)
         except Exception as exc:
@@ -351,6 +389,7 @@ def generate_a2_t(
     provider: PriceProvider,
     *,
     source_name: str = "yahoo",
+    prediction_window_days: int = A2_PREDICTION_WINDOW_DAYS,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Build A2-T records for one market and cutoff."""
     parse_iso_date(cutoff_date)
@@ -363,7 +402,12 @@ def generate_a2_t(
         cohort_key = spec["cohort_key"]
         cohort_id = f"{market}_{cohort_key}_{compact}"
         stocks, skipped, stock_warnings = _collect_a2_price_stocks(
-            spec, market, cutoff_date, provider, "A2-T"
+            spec,
+            market,
+            cutoff_date,
+            provider,
+            "A2-T",
+            prediction_window_days=prediction_window_days,
         )
         warnings.extend(stock_warnings)
         if len(stocks) < A2_MIN_STOCKS:
@@ -377,7 +421,7 @@ def generate_a2_t(
             "task_id": f"A2T-{market}-{compact}-{cohort_key}",
             "industry_name": spec["industry_name"],
             "cutoff_date": cutoff_date,
-            "prediction_window_days": A2_PREDICTION_WINDOW_DAYS,
+            "prediction_window_days": prediction_window_days,
             "stocks": stocks,
         }
 
@@ -401,8 +445,9 @@ def generate_a2_f(
     *,
     source_name: str = "yahoo",
     fundamentals: YahooFundamentals | None = None,
+    prediction_window_days: int = A2_PREDICTION_WINDOW_DAYS,
 ) -> tuple[list[dict[str, Any]], list[str]]:
-    """Build A2-F records from Yahoo valuation snapshots and 30d forward returns."""
+    """Build A2-F records from Yahoo valuation snapshots and forward returns."""
     parse_iso_date(cutoff_date)
     currency = currency_for_market(market)
     compact = _compact_date(cutoff_date)
@@ -416,7 +461,12 @@ def generate_a2_f(
         cohort_key = spec["cohort_key"]
         cohort_id = f"{market}_{cohort_key}_{compact}"
         stocks, skipped, stock_warnings = _collect_a2_price_stocks(
-            spec, market, cutoff_date, provider, "A2-F"
+            spec,
+            market,
+            cutoff_date,
+            provider,
+            "A2-F",
+            prediction_window_days=prediction_window_days,
         )
         warnings.extend(stock_warnings)
         usable, fund_history, fund_warnings = _attach_fundamentals(
@@ -438,7 +488,7 @@ def generate_a2_f(
             "task_id": f"A2F-{market}-{compact}-{cohort_key}",
             "industry_name": spec["industry_name"],
             "cutoff_date": cutoff_date,
-            "prediction_window_days": A2_PREDICTION_WINDOW_DAYS,
+            "prediction_window_days": prediction_window_days,
             "stocks": [{"code": stock["code"], "name": stock["name"]} for stock in usable.values()],
         }
 
@@ -464,6 +514,7 @@ def generate_a2_h(
     *,
     source_name: str = "yahoo",
     fundamentals: YahooFundamentals | None = None,
+    prediction_window_days: int = A2_PREDICTION_WINDOW_DAYS,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Build A2-H records from Yahoo valuation snapshots plus technicals."""
     parse_iso_date(cutoff_date)
@@ -478,7 +529,12 @@ def generate_a2_h(
         cohort_key = spec["cohort_key"]
         cohort_id = f"{market}_{cohort_key}_{compact}"
         stocks, skipped, stock_warnings = _collect_a2_price_stocks(
-            spec, market, cutoff_date, provider, "A2-H"
+            spec,
+            market,
+            cutoff_date,
+            provider,
+            "A2-H",
+            prediction_window_days=prediction_window_days,
         )
         warnings.extend(stock_warnings)
         usable, fund_history, fund_warnings = _attach_fundamentals(
@@ -497,7 +553,7 @@ def generate_a2_h(
             "task_id": f"A2H-{market}-{compact}-{cohort_key}",
             "industry_name": spec["industry_name"],
             "cutoff_date": cutoff_date,
-            "prediction_window_days": A2_PREDICTION_WINDOW_DAYS,
+            "prediction_window_days": prediction_window_days,
             "stocks": usable,
         }
 
@@ -738,6 +794,37 @@ TASK_HANDLERS = {
     "C": (generate_c, c_identity),
 }
 
+PANEL_TASK_FILES = {
+    "A1": "a1_valuation.jsonl",
+    "A2-F": "a2_fundamentals.jsonl",
+    "A2-T": "a2_technical.jsonl",
+    "A2-H": "a2_hybrid.jsonl",
+    "B": "b_event.jsonl",
+    "C": "c_financial_metric.jsonl",
+}
+
+
+def _stamp_panel_metadata(
+    records: list[dict[str, Any]],
+    *,
+    panel_id: str | None,
+    horizon_days: int,
+    cutoff_date: str,
+) -> list[dict[str, Any]]:
+    """Attach panel tags used by aligned-panel validation."""
+    if not panel_id:
+        return records
+    stamped: list[dict[str, Any]] = []
+    for record in records:
+        row = dict(record)
+        metadata = dict(row.get("metadata") or {})
+        metadata["panel"] = panel_id
+        metadata["panel_horizon_days"] = horizon_days
+        metadata["panel_cutoff_date"] = cutoff_date
+        row["metadata"] = metadata
+        stamped.append(row)
+    return stamped
+
 
 def generate(
     task: str,
@@ -750,6 +837,8 @@ def generate(
     replace: bool = False,
     training_cutoff: str = DEFAULT_TRAINING_CUTOFF,
     current_date: str = DEFAULT_CURRENT_DATE,
+    horizon_days: int = A2_PREDICTION_WINDOW_DAYS,
+    panel_id: str | None = None,
 ) -> dict[str, Any]:
     """Generate records and write them to output."""
     if task not in TASK_HANDLERS:
@@ -759,7 +848,16 @@ def generate(
 
     provider = _provider(provider_name)
     handler, identity_fn = TASK_HANDLERS[task]
-    generated, warnings = handler(market, cutoff_date, provider, source_name=provider_name)
+    handler_kwargs: dict[str, Any] = {"source_name": provider_name}
+    if task in {"A2-T", "A2-F", "A2-H"}:
+        handler_kwargs["prediction_window_days"] = horizon_days
+    generated, warnings = handler(market, cutoff_date, provider, **handler_kwargs)
+    generated = _stamp_panel_metadata(
+        generated,
+        panel_id=panel_id,
+        horizon_days=horizon_days,
+        cutoff_date=cutoff_date,
+    )
     generated = _assign_bands(generated, training_cutoff, current_date)
     output_path = Path(output)
     existing = _load_jsonl(output_path) if append else []
@@ -770,6 +868,8 @@ def generate(
         "market": market,
         "cutoff_date": cutoff_date,
         "provider": provider_name,
+        "horizon_days": horizon_days,
+        "panel_id": panel_id,
         "output": str(output_path),
         "generated": len(generated),
         "added": added,
@@ -778,19 +878,96 @@ def generate(
     }
 
 
+def generate_panel(
+    cutoff_date: str,
+    *,
+    markets: list[str] | tuple[str, ...] = SUPPORTED_MARKETS,
+    tasks: list[str] | tuple[str, ...] = ("A1", "A2-F", "A2-T", "A2-H"),
+    horizon_days: int = A2_PREDICTION_WINDOW_DAYS,
+    provider_name: str = "yahoo",
+    output_dir: str | Path = "seeds/aligned",
+    panel_id: str = "aligned_v1",
+    append: bool = True,
+    replace: bool = True,
+    training_cutoff: str = DEFAULT_TRAINING_CUTOFF,
+    current_date: str = DEFAULT_CURRENT_DATE,
+) -> dict[str, Any]:
+    """Generate all configured tasks/markets for one cutoff into output_dir."""
+    parse_iso_date(cutoff_date)
+    out_root = Path(output_dir)
+    out_root.mkdir(parents=True, exist_ok=True)
+    jobs: list[dict[str, Any]] = []
+    for task in tasks:
+        if task not in PANEL_TASK_FILES:
+            raise ValueError(f"Unsupported panel task: {task}")
+        output = out_root / PANEL_TASK_FILES[task]
+        for market in markets:
+            if market not in SUPPORTED_MARKETS:
+                raise ValueError(f"Unsupported market: {market}")
+            summary = generate(
+                task,
+                market,
+                cutoff_date,
+                provider_name=provider_name,
+                output=output,
+                append=append,
+                replace=replace,
+                training_cutoff=training_cutoff,
+                current_date=current_date,
+                horizon_days=horizon_days,
+                panel_id=panel_id,
+            )
+            jobs.append(summary)
+    return {
+        "mode": "panel",
+        "cutoff_date": cutoff_date,
+        "markets": list(markets),
+        "tasks": list(tasks),
+        "horizon_days": horizon_days,
+        "panel_id": panel_id,
+        "output_dir": str(out_root),
+        "jobs": jobs,
+        "generated_total": sum(job["generated"] for job in jobs),
+        "added_total": sum(job["added"] for job in jobs),
+    }
+
+
 def main() -> int:
     """CLI entry for data_generator."""
     args = parse_args()
-    summary = generate(
-        args.task,
-        args.market,
-        args.cutoff_date,
-        provider_name=args.provider,
-        output=args.output,
-        append=args.append,
-        training_cutoff=args.training_cutoff,
-        current_date=args.current_date,
-    )
+    if args.panel:
+        markets = [item.strip() for item in args.markets.split(",") if item.strip()]
+        tasks = [item.strip() for item in args.tasks.split(",") if item.strip()]
+        output_dir = args.output_dir or "seeds/aligned"
+        summary = generate_panel(
+            args.cutoff_date,
+            markets=markets,
+            tasks=tasks,
+            horizon_days=args.horizon,
+            provider_name=args.provider,
+            output_dir=output_dir,
+            panel_id=args.panel_id or "aligned_v1",
+            append=True,
+            replace=True,
+            training_cutoff=args.training_cutoff,
+            current_date=args.current_date,
+        )
+    else:
+        if not args.task or not args.market or not args.output:
+            raise SystemExit("Single-task mode requires --task, --market, and --output.")
+        summary = generate(
+            args.task,
+            args.market,
+            args.cutoff_date,
+            provider_name=args.provider,
+            output=args.output,
+            append=args.append,
+            replace=args.replace,
+            training_cutoff=args.training_cutoff,
+            current_date=args.current_date,
+            horizon_days=args.horizon,
+            panel_id=args.panel_id,
+        )
     print(json.dumps(summary, ensure_ascii=False, indent=2))
     return 0
 

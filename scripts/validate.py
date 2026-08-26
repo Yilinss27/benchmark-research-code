@@ -117,6 +117,11 @@ def validate() -> list[str]:
 
     for path in sorted(root.glob("seeds/**/*.jsonl")):
         rel = path.relative_to(root).as_posix()
+        # Aligned panel reuses the same task_id scheme as a parallel experiment set.
+        # Skip combined dump; validate schema but do not merge ids into the main-library uniqueness check.
+        if rel == "seeds/aligned/all.jsonl":
+            continue
+        aligned = rel.startswith("seeds/aligned/")
         for i, row in enumerate(load_jsonl(path), 1):
             prefix = f"{rel}:{i}"
             missing = REQUIRED_FIELDS - row.keys()
@@ -127,7 +132,8 @@ def validate() -> list[str]:
             if "is_template" not in metadata:
                 errors.append(f"{prefix} metadata.is_template missing")
 
-            task_ids.append(row["task_id"])
+            if not aligned:
+                task_ids.append(row["task_id"])
 
             if row["category"] == "D":
                 series = row["seed"].get("historical_price_series", [])

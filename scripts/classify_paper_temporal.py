@@ -50,6 +50,11 @@ def parse_args() -> argparse.Namespace:
         help="Summary report JSON path.",
     )
     parser.add_argument(
+        "--seed-dir",
+        default=None,
+        help="If set, classify all *.jsonl under this directory instead of default READY_FILES.",
+    )
+    parser.add_argument(
         "--training-cutoff",
         default=DEFAULT_EXPERIMENT_CONFIG.backbone_training_cutoff,
         help="Backbone training cutoff.",
@@ -114,8 +119,16 @@ def main() -> int:
     )
     root = ROOT
     records: list[dict[str, Any]] = []
-    for rel in READY_FILES:
-        records.extend(load_jsonl(root / rel))
+    if args.seed_dir:
+        seed_dir = root / args.seed_dir
+        paths = sorted(p for p in seed_dir.glob("*.jsonl") if p.name != "all.jsonl")
+        if not paths:
+            raise SystemExit(f"No JSONL files under {seed_dir}")
+        for path in paths:
+            records.extend(load_jsonl(path))
+    else:
+        for rel in READY_FILES:
+            records.extend(load_jsonl(root / rel))
 
     price_provider = YahooPriceProvider() if args.enrich_yahoo else None
     fundamentals = YahooFundamentals() if args.enrich_yahoo else None
