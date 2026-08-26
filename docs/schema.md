@@ -37,7 +37,7 @@
     "cutoff_date": "2025-06-06",
     "cutoff_date_source": "seed.cutoff_date",
     "is_synthetic_cutoff_date": false,
-    "model_training_cutoff": "2024-06-01",
+    "model_training_cutoff": "2024-06-30",
     "reference_current_date": "2026-08-08",
     "rule": "T1: cutoff_date <= model_training_cutoff; T2: model_training_cutoff < cutoff_date < reference_current_date; T3: cutoff_date >= reference_current_date"
   },
@@ -64,7 +64,7 @@ A1 prompt 使用 `{currency_unit}`（`元` / `USD` / `HKD`），避免美股/港
 
 默认发布参数：
 
-- `model_training_cutoff = 2024-06-01`
+- `model_training_cutoff = 2024-06-30`
 - `reference_current_date = 2026-08-08`
 
 切分规则：
@@ -82,21 +82,23 @@ A1 prompt 使用 `{currency_unit}`（`元` / `USD` / `HKD`），避免美股/港
 | 字段 | 说明 |
 |------|------|
 | `forecast_origin` | 预测锁定时点（日精度） |
-| `outcome_available_at` | 结果首次完整公开日；T3 前瞻题可为 `pending` |
+| `outcome_available_at` | 结果可用日；是否为观测值须结合 `outcome_available_at_source`，T3 可为 `pending` |
+| `outcome_available_at_source` | `observed_*` 为观测日期；`modeled_*` / `heuristic_*` 为估计日期 |
 | `paper_band` | `T1` / `T2` / `T3` / `quarantine` / `D` / `E` |
 | `review_status` | `draft` / `reviewed` |
-| `quality_flags` | 如 `fundamentals_after_origin` |
+| `quality_flags` | 如 `modeled_outcome_availability`、`fundamentals_after_origin` |
+| `official_temporal_eligible` | 是否具备进入官方分所需的时间证据 |
 
 默认论文参数（`gpt-4.1` backbone）：
 
-- `backbone_training_cutoff = 2024-06-01`
+- `backbone_training_cutoff = 2024-06-30`（GPT-4.1 的 “June 2024” 按月末保守处理）
 - `guard_days = 30`
 - `experiment_as_of = 2026-08-17`
 
 分类规则：
 
-- `T1`：`outcome_available_at <= 2024-05-02`
-- `T2`：`forecast_origin >= 2024-07-01` 且 `outcome_available_at <= 2026-07-18`
+- `T1`：`outcome_available_at <= 2024-05-31`
+- `T2`：`forecast_origin >= 2024-07-30` 且 `outcome_available_at <= 2026-07-18`
 - `T3`：`forecast_origin >= 2026-08-17`
 - `quarantine`：其余 A1–C
 
@@ -110,7 +112,9 @@ python -m src.run_benchmark \
   --agent mock
 ```
 
-官方分（任务等权、仅 T2）见 `metrics_summary.json` 中的 `official_score`。
+官方分（任务等权、仅 T2 且 `official_temporal_eligible=true`）见
+`metrics_summary.json` 中的 `official_score`。当前 C 的 filing-lag 日期为模型估计，
+在补齐真实首次披露日之前不会进入官方分。
 
 ## `status` 枚举
 

@@ -113,7 +113,7 @@ Each ready record has:
 
 Default split parameters in the current release:
 
-- `model_training_cutoff = 2024-06-01`
+- `model_training_cutoff = 2024-06-30`（GPT-4.1 的 “June 2024” 按月末保守处理）
 - `reference_current_date = 2026-08-08`
 
 Rules:
@@ -136,7 +136,7 @@ For a model with a different training cutoff, recompute the split:
 
 ```bash
 python scripts/assign_time_bands.py \
-  --training-cutoff 2024-06-01 \
+  --training-cutoff 2024-06-30 \
   --current-date 2026-08-08 \
   --in-place
 ```
@@ -147,7 +147,7 @@ The runner can also recompute the split in memory without changing files:
 python -m src.run_benchmark \
   --seed hf_dataset/data/e/train.jsonl \
   --agent mock \
-  --model-training-cutoff 2024-06-01 \
+  --model-training-cutoff 2024-06-30 \
   --current-date 2026-08-08 \
   --output results/mock_e_temporal
 ```

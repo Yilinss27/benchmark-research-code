@@ -9,7 +9,7 @@ from src.data.providers.yahoo import YahooPriceProvider
 from src.data.yahoo_fundamentals import ANNUAL_LAG_DAYS, QUARTER_LAG_DAYS, YahooFundamentals
 
 
-def enrich_b_outcome(record: dict[str, Any], provider: YahooPriceProvider | None = None) -> dict[str, str]:
+def enrich_b_outcome(record: dict[str, Any], provider: YahooPriceProvider | None = None) -> dict[str, Any]:
     """Return outcome_available_at and evidence for a B earnings record."""
     seed = record.get("seed") or {}
     market = seed.get("market") or record.get("metadata", {}).get("market") or "CN_A"
@@ -25,26 +25,35 @@ def enrich_b_outcome(record: dict[str, Any], provider: YahooPriceProvider | None
         outcome = next_bars[0].trading_day
         return {
             "outcome_available_at": outcome,
+            "outcome_available_at_source": "observed_yahoo_next_session_close",
             "outcome_evidence_code": "yahoo_next_session_close",
             "outcome_evidence_url": None,
+            "quality_flags": [],
         }
     return {
         "outcome_available_at": add_calendar_days(event_date, 1),
+        "outcome_available_at_source": "heuristic_event_plus_1d",
         "outcome_evidence_code": "heuristic_event_plus_1d",
         "outcome_evidence_url": None,
+        "quality_flags": ["modeled_outcome_availability"],
     }
 
 
-def enrich_c_outcome(record: dict[str, Any], fundamentals: YahooFundamentals | None = None) -> dict[str, str]:
-    """Return outcome_available_at for a C record from future report period + filing lag."""
+def enrich_c_outcome(record: dict[str, Any], fundamentals: YahooFundamentals | None = None) -> dict[str, Any]:
+    """Estimate C availability from period end plus a documented filing lag.
+
+    This is deliberately labeled modeled, not an observed first-publication date.
+    """
     seed = record.get("seed") or {}
     metadata = record.get("metadata") or {}
     future_period = str(seed.get("report_period_future") or "")
     if not future_period:
         return {
             "outcome_available_at": add_calendar_days(str(seed.get("cutoff_date")), 90),
+            "outcome_available_at_source": "modeled_cutoff_plus_90d",
             "outcome_evidence_code": "heuristic_cutoff_plus_90d",
             "outcome_evidence_url": None,
+            "quality_flags": ["modeled_outcome_availability"],
         }
 
     freq = metadata.get("statement_freq") or "quarterly"
@@ -54,6 +63,8 @@ def enrich_c_outcome(record: dict[str, Any], fundamentals: YahooFundamentals | N
     outcome = add_calendar_days(future_period, lag)
     return {
         "outcome_available_at": outcome,
+        "outcome_available_at_source": f"modeled_report_period_plus_{lag}d",
         "outcome_evidence_code": f"report_period_future_plus_{lag}d",
         "outcome_evidence_url": None,
+        "quality_flags": ["modeled_outcome_availability"],
     }

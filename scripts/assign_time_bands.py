@@ -33,7 +33,7 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Assign T1/T2/T3 temporal bands to ready seeds.")
     parser.add_argument(
         "--training-cutoff",
-        default="2024-06-01",
+        default="2024-06-30",
         help="Model pretraining cutoff date. cutoff_date <= this date is T1.",
     )
     parser.add_argument(

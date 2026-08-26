@@ -32,7 +32,9 @@ A2_PREDICTION_WINDOW_DAYS = 30
 class PaperExperimentConfig:
     """Constants for paper temporal geometry."""
 
-    backbone_training_cutoff: str = "2024-06-01"
+    # GPT-4.1 documents its knowledge cutoff at month granularity ("June 2024").
+    # Use month-end conservatively rather than assuming knowledge stopped June 1.
+    backbone_training_cutoff: str = "2024-06-30"
     guard_days: int = 30
     experiment_as_of: str = "2026-08-17"
 
@@ -321,11 +323,23 @@ def build_index_row(
             )
         )
     )
+    availability_source = str(temporal.get("outcome_available_at_source") or "")
+    if availability_source.startswith(("heuristic_", "modeled_")):
+        flags = sorted(set(flags + ["modeled_outcome_availability"]))
     paper_band, reason = classify_paper_band(record, origin, outcome, config)
 
     if "fundamentals_after_origin" in flags and paper_band == "T2":
         paper_band = "quarantine"
         reason = "fundamentals_after_origin"
+
+    official_temporal_eligible = not any(
+        flag in {
+            "fundamentals_after_origin",
+            "missing_outcome_evidence",
+            "modeled_outcome_availability",
+        }
+        for flag in flags
+    )
 
     row = {
         "task_id": record["task_id"],
@@ -342,6 +356,7 @@ def build_index_row(
         "paper_band_reason": reason,
         "review_status": review_status,
         "quality_flags": flags,
+        "official_temporal_eligible": official_temporal_eligible,
         "backbone_training_cutoff": config.backbone_training_cutoff,
         "guard_days": config.guard_days,
         "experiment_as_of": config.experiment_as_of,

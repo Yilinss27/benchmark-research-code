@@ -63,6 +63,7 @@ def aggregate_official_score(
         prediction
         for prediction in predictions
         if prediction.get("paper_band") == paper_band
+        and prediction.get("official_temporal_eligible", True)
     ]
 
     by_task: dict[str, list[float]] = {task: [] for task in OFFICIAL_TASKS}

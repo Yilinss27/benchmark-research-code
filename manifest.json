@@ -21,29 +21,36 @@
   },
   "counts": {
     "A1_ready": 228,
-    "A2-F_ready": 106,
-    "A2-T_ready": 169,
-    "A2-H_ready": 104,
-    "B_ready": 68,
+    "A2-F_ready": 98,
+    "A2-T_ready": 161,
+    "A2-H_ready": 96,
+    "B_ready": 66,
     "C_ready": 176,
     "D_ready": 12,
     "E_ready": 12,
     "template_records": 94,
-    "total_ready_records": 875
+    "total_ready_records": 849
   },
   "paper_temporal": {
     "index": "data/task_temporal_index.jsonl",
     "report": "data/paper_temporal_report.json",
     "script": "scripts/classify_paper_temporal.py",
-    "backbone_training_cutoff": "2024-06-01",
+    "backbone_model": "gpt-4.1",
+    "backbone_training_cutoff": "2024-06-30",
+    "cutoff_policy": "GPT-4.1 documents June 2024 at month granularity; use month-end conservatively",
     "guard_days": 30,
     "experiment_as_of": "2026-08-17",
     "counts": {
       "T1": 404,
-      "T2": 447,
+      "T2": 421,
       "quarantine": 0,
       "D": 12,
       "E": 12
+    },
+    "official_temporal_eligible_counts": {
+      "T1": 356,
+      "T2": 288,
+      "note": "C modeled filing-lag availability and B macro without evidence are excluded"
     }
   },
   "validation": {
@@ -52,13 +59,13 @@
   },
   "temporal_split": {
     "script": "scripts/assign_time_bands.py",
-    "command": "python scripts/assign_time_bands.py --training-cutoff 2024-06-01 --current-date 2026-08-08 --in-place",
-    "model_training_cutoff": "2024-06-01",
+    "command": "python scripts/assign_time_bands.py --training-cutoff 2024-06-30 --current-date 2026-08-08 --in-place",
+    "model_training_cutoff": "2024-06-30",
     "reference_current_date": "2026-08-08",
     "rule": "legacy time_band on cutoff_date only; paper experiments use paper_band from task_temporal_index",
     "counts": {
-      "T1": 404,
-      "T2": 447,
+      "T1": 420,
+      "T2": 425,
       "T3": 4
     }
   },
@@ -71,5 +78,5 @@
     "file": "calibration/leakage_probe_v1.json",
     "manifest": "calibration/leakage_probe_manifest.json"
   },
-  "notes": "v0.7.0: Paper temporal index, expanded A2 cohorts (T1>=30 for A2-F/H), quarantine records removed, T3 forward templates, leakage calibration scaffold, official T2 task-equal scoring."
+  "notes": "v0.7.0: GPT-4.1 June 2024 cutoff is conservatively month-end; 26 guard-window rows removed. HF rows include auditable paper temporal fields. Modeled C availability remains ineligible for the official score."
 }

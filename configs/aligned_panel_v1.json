@@ -25,7 +25,7 @@
     "require_same_cohort_keys": true
   },
   "notes": [
-    "Does not modify the main 875-record seed library.",
+    "Does not modify the main 849-record seed library.",
     "B/C deferred to a later panel version.",
     "Switching cutoff only requires regenerate with the same config."
   ]

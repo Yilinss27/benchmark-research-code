@@ -599,6 +599,10 @@ def main() -> int:
                 "time_band": record.get("time_band"),
                 "paper_band": record.get("paper_band"),
                 "paper_temporal": record.get("paper_temporal"),
+                "official_temporal_eligible": record.get(
+                    "official_temporal_eligible", True
+                ),
+                "quality_flags": record.get("quality_flags", []),
                 "temporal_split": record.get("metadata", {}).get("temporal_split"),
                 "agent": args.agent,
                 "model": args.model,

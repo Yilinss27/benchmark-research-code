@@ -75,7 +75,7 @@ def parse_args() -> argparse.Namespace:
 def _assign(path: Path, records: list[dict[str, Any]]) -> None:
     """Rewrite a seed file with temporal bands assigned."""
     assigned = [
-        update_temporal_band(record, "2024-06-01", "2026-08-08")
+        update_temporal_band(record, "2024-06-30", "2026-08-08")
         for record in records
     ]
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -96,7 +96,7 @@ def expand_a1_t1(root: Path) -> dict[str, Any]:
                 cutoff,
                 output=output,
                 append=True,
-                training_cutoff="2024-06-01",
+                training_cutoff="2024-06-30",
                 current_date="2026-08-08",
             )
             summaries.append(summary)
@@ -121,7 +121,7 @@ def expand_a2_all(root: Path) -> dict[str, Any]:
                     output=output,
                     append=True,
                     replace=True,
-                    training_cutoff="2024-06-01",
+                    training_cutoff="2024-06-30",
                     current_date="2026-08-08",
                 )
                 summaries.append(summary)
@@ -183,7 +183,7 @@ def build_t3_forward(root: Path) -> dict[str, Any]:
                             "currency": currency_map[market],
                         },
                     }
-                    record = update_temporal_band(record, "2024-06-01", "2026-08-08")
+                    record = update_temporal_band(record, "2024-06-30", "2026-08-08")
                     records.append(record)
                     index += 1
     _assign(output, records)
@@ -202,7 +202,7 @@ def expand_b_earnings(root: Path) -> dict[str, Any]:
                 cutoff,
                 output=output,
                 append=True,
-                training_cutoff="2024-06-01",
+                training_cutoff="2024-06-30",
                 current_date="2026-08-08",
             )
             summaries.append(summary)

@@ -97,7 +97,7 @@ def _enrich_record(
     enrich_yahoo: bool,
     price_provider: YahooPriceProvider | None,
     fundamentals: YahooFundamentals | None,
-) -> dict[str, str | None]:
+) -> dict[str, Any]:
     """Optional Yahoo enrichment for B/C outcome dates."""
     if not enrich_yahoo:
         return {}
@@ -141,16 +141,20 @@ def main() -> int:
             price_provider=price_provider,
             fundamentals=fundamentals,
         )
-        index_rows.append(
-            build_index_row(
-                record,
-                config=config,
-                review_status=args.review_status,
-                outcome_available_at=enrichment.get("outcome_available_at"),
-                outcome_evidence_url=enrichment.get("outcome_evidence_url"),
-                outcome_evidence_code=enrichment.get("outcome_evidence_code"),
-            )
+        index_row = build_index_row(
+            record,
+            config=config,
+            review_status=args.review_status,
+            outcome_available_at=enrichment.get("outcome_available_at"),
+            outcome_evidence_url=enrichment.get("outcome_evidence_url"),
+            outcome_evidence_code=enrichment.get("outcome_evidence_code"),
+            quality_flags=enrichment.get("quality_flags"),
         )
+        if enrichment.get("outcome_available_at_source"):
+            index_row["outcome_available_at_source"] = enrichment[
+                "outcome_available_at_source"
+            ]
+        index_rows.append(index_row)
 
     output_path = root / args.output
     report_path = root / args.report

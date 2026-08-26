@@ -6,11 +6,12 @@ Generated from `scripts/classify_paper_temporal.py --enrich-yahoo`.
 
 | Parameter | Value |
 |-----------|-------|
-| `backbone_training_cutoff` | `2024-06-01` |
+| `backbone_model` | `gpt-4.1` |
+| `backbone_training_cutoff` | `2024-06-30` (month-end conservative policy) |
 | `guard_days` | `30` |
 | `experiment_as_of` | `2026-08-17` |
-| T1 `outcome_available_at` max | `2024-05-02` |
-| T2 `forecast_origin` min | `2024-07-01` |
+| T1 `outcome_available_at` max | `2024-05-31` |
+| T2 `forecast_origin` min | `2024-07-30` |
 | T2 `outcome_available_at` max | `2026-07-18` |
 
 ## Ready record counts (v0.7 paper index)
@@ -18,38 +19,48 @@ Generated from `scripts/classify_paper_temporal.py --enrich-yahoo`.
 | File | Ready rows |
 |------|----------:|
 | `seeds/a1_valuation.jsonl` | 228 |
-| `seeds/a2_fundamentals.jsonl` | 55 |
-| `seeds/a2_technical.jsonl` | 93 |
-| `seeds/a2_hybrid.jsonl` | 55 |
-| `seeds/b_event.jsonl` | 68 |
-| `seeds/c_financial_metric.jsonl` | 180 |
+| `seeds/a2_fundamentals.jsonl` | 98 |
+| `seeds/a2_technical.jsonl` | 161 |
+| `seeds/a2_hybrid.jsonl` | 96 |
+| `seeds/b_event.jsonl` | 66 |
+| `seeds/c_financial_metric.jsonl` | 176 |
 | `seeds/d_counterfactual.jsonl` | 12 |
 | `seeds/e_formula.jsonl` | 12 |
-| **Total ready** | **703** |
+| **Total ready** | **849** |
 
 Forward T3 templates (not in ready total): `seeds/t3_forward.jsonl` (84 templates, `outcome_status=pending`).
 
-## paper_band distribution (703 ready)
+## paper_band distribution (849 ready)
 
 | Band | Count |
 |------|------:|
-| T1 | 322 |
-| T2 | 339 |
-| quarantine | 18 |
+| T1 | 404 |
+| T2 | 421 |
+| quarantine | 0 |
 | D | 12 |
 | E | 12 |
+
+Official temporal eligibility (observed/evidenced outcome availability):
+
+| Band | Eligible | Raw |
+|------|---------:|----:|
+| T1 | 356 | 404 |
+| T2 | 288 | 421 |
+
+C remains available as a research set, but its filing-lag availability is modeled rather
+than an observed first-publication date, so it is excluded from the official score.
 
 ## By category (paper_band)
 
 | Category | T1 | T2 | quarantine | Notes |
 |----------|---:|---:|-----------:|-------|
 | A1 | 182 | 46 | 0 | T1 target met |
-| A2-F | 13 | 38 | 4 | T2 target met; 4 legacy/fundamentals quarantine |
-| A2-T | 51 | 38 | 4 | Both bands ≥30 |
-| A2-H | 13 | 36 | 6 | T2 ≥30; legacy snapshot pollution quarantined |
-| B earnings | 15 | 48 | 0 | Expanded universe |
+| A2-F | 32 | 66 | 0 | T1/T2 targets met |
+| A2-T | 95 | 66 | 0 | Both bands ≥30 |
+| A2-H | 32 | 64 | 0 | T1/T2 targets met |
+| B earnings | 15 | 46 | 0 | Observed next-session outcomes |
 | B macro | 0 | 5 | 0 | Legacy CSV only |
-| C | 48 | 128 | 4 | Yahoo filing-lag outcomes |
+| C | 48 | 128 | 0 | Filing-lag availability is modeled; excluded from official score |
 | D | — | — | — | 12 × `D` band |
 | E | — | — | — | 12 × `E` band |
 
@@ -57,9 +68,8 @@ Forward T3 templates (not in ready total): `seeds/t3_forward.jsonl` (84 template
 
 | Flag | Count | Action |
 |------|------:|--------|
-| `fundamentals_after_origin` | 2 | Legacy A2-H rows quarantined |
-| `prototype_fallback_fundamentals` | 2 | Legacy A2-F CSV rows |
-| `missing_outcome_evidence` | 5 | Needs manual review URLs |
+| `modeled_outcome_availability` | 181 | C (176) + B macro (5); excluded from official score |
+| `missing_outcome_evidence` | 5 | B macro; excluded from official score |
 
 ## Artifacts
 
