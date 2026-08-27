@@ -1,8 +1,8 @@
 # T1 / T2 跨时间不对称清单（技术侧）
 
-> 统计日：2026-08-27  
-> 口径：`paper_band`（`data/task_temporal_index.jsonl`）  
-> 正式主库 ready = 849（按 GPT-4.1 月末 cutoff 已清 quarantine）
+> 统计日：2026-08-27
+> 口径：`paper_band`（`data/task_temporal_index.jsonl`）
+> 正式主库 ready = 851（按 GPT-4.1 月末 cutoff 已清 quarantine）
 > 用途：供跨时间对齐；正式业务清单以游杰舜梳理为准，本文件为代码侧快照。
 
 ---
@@ -15,7 +15,7 @@
 | A2-F | 32 | 66 | cohort 齐但 cutoff 数不同；GPT-4.1 guard 内的 2024-07-15 已删除 |
 | A2-T | 95 | 66 | T1 cutoff 远多于 T2；hk_tech/pharma/tech/us_tech T1 不全 |
 | A2-H | 32 | 64 | 同 A2-F |
-| B | 15 | 51 | 按事件日散落，难与 A 类同 cutoff 横比 |
+| B | 15 | 53 | 按事件日散落，难与 A 类同 cutoff 横比 |
 | C | 48 | 128 | T1 几乎只有 `2023-12-29`；US/HK 极少 |
 
 **结论：** 总量够，但 **不可按「同一股票池 × 同一题型 × 不同 cutoff」直接横比**。会议要求优先建 aligned panel，而非继续堆非对称扩量。
@@ -52,7 +52,7 @@
 | band | n | 备注 |
 |------|--:|------|
 | T1 | 95 | 历史 cutoff 多（技术面易成题） |
-| T2 | 74 | 与 F/H 的 T2 cutoff 大致同族 |
+| T2 | 66 | 与 F/H 的 T2 cutoff 大致同族 |
 
 - `hk_tech` T1=10、`tech/pharma/us_tech` T1=11，相对 `financial/consumer` 的 13 略缺
 
@@ -69,13 +69,12 @@
 |----|------|
 | 题型 | A1, A2-F, A2-T, A2-H |
 | 市场 | CN_A, US, HK |
-| T1 cutoff | `2023-12-29` |
-| T2 cutoff | `2025-12-31` |
+| cutoff | 14 组严格配对，包含 `2025-12-31` T2 锚点 |
 | horizon | 30 天（可调） |
 | 股票/cohort | 与 `src/data/universe.py` 当前 A1_UNIVERSE / A2_T_COHORTS 一致 |
-| 产出 | `seeds/aligned/`（不覆盖主库 849） |
+| 产出 | `seeds/aligned/`（不覆盖主库 851） |
 
-成功标准：同一题型在两 cutoff 上 **市场×cohort 结构一致**（允许因行情/基本面缺失导致少量差分，阈值由校验脚本约束）。
+当前结果：T1=872、T2=872；逐 pair 股票/cohort 集合一致，每个市场×题型两侧累计均 ≥50，30 天窗口内部不重叠。
 
 ---
 
@@ -85,6 +84,6 @@
 |--------|------------|
 | 保留现有 T2，新增 25 年底 | 主库保留；panel 以 `2025-12-31` 为 T2 锚点 |
 | 跨时间题型/题量一致 | panel 强制同任务同池 |
-| 单市场单题型 ~50 | panel 先对齐结构，再按需扩 cutoff 对数 |
+| 单市场单题型 ~50 | 14 组 pair 已达到两侧累计 ≥50 |
 | 生成低成本切时间点 | `generate_panel(provider, cutoff, …)` |
 | 不做 C3 / 本轮不主攻真 T3 | 见 aligned 配置 `tasks` 不含 B/C/D/E |

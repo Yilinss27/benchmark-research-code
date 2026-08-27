@@ -3,10 +3,22 @@
   "description": "Cross-time aligned A1/A2 panel: same universe, cohorts, tasks, and horizon; only cutoff differs.",
   "tasks": ["A1", "A2-F", "A2-T", "A2-H"],
   "markets": ["CN_A", "US", "HK"],
-  "cutoffs": {
-    "T1": "2023-12-29",
-    "T2": "2025-12-31"
-  },
+  "cutoff_pairs": [
+    {"pair_id": "p01", "T1": "2022-04-29", "T2": "2024-07-31"},
+    {"pair_id": "p02", "T1": "2023-04-28", "T2": "2024-09-30"},
+    {"pair_id": "p03", "T1": "2023-05-29", "T2": "2024-10-31"},
+    {"pair_id": "p04", "T1": "2023-06-28", "T2": "2024-12-31"},
+    {"pair_id": "p05", "T1": "2023-07-28", "T2": "2025-01-31"},
+    {"pair_id": "p06", "T1": "2023-08-28", "T2": "2025-03-31"},
+    {"pair_id": "p07", "T1": "2023-09-27", "T2": "2025-05-30"},
+    {"pair_id": "p08", "T1": "2023-10-27", "T2": "2025-06-30"},
+    {"pair_id": "p09", "T1": "2023-11-27", "T2": "2025-07-31"},
+    {"pair_id": "p10", "T1": "2023-12-27", "T2": "2025-09-30"},
+    {"pair_id": "p11", "T1": "2024-01-26", "T2": "2025-11-28"},
+    {"pair_id": "p12", "T1": "2024-02-26", "T2": "2025-12-31"},
+    {"pair_id": "p13", "T1": "2024-03-27", "T2": "2026-02-27"},
+    {"pair_id": "p14", "T1": "2024-04-26", "T2": "2026-03-31"}
+  ],
   "horizon_days": 30,
   "provider": "yahoo",
   "universe_source": "src.data.universe.A1_UNIVERSE",
@@ -22,11 +34,14 @@
   "temporal_report": "data/aligned_paper_temporal_report.json",
   "symmetry": {
     "max_count_diff_per_cell": 2,
-    "require_same_cohort_keys": true
+    "require_same_cohort_keys": true,
+    "require_same_stock_codes": true,
+    "min_cumulative_per_market_task": 50,
+    "min_cutoff_gap_days_same_band": 30
   },
   "notes": [
     "Does not modify the main 849-record seed library.",
     "B/C deferred to a later panel version.",
-    "Switching cutoff only requires regenerate with the same config."
+    "Fourteen pairs have non-overlapping 30-day interval interiors; adjacent intervals may share one boundary close."
   ]
 }

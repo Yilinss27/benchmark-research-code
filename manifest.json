@@ -1,6 +1,6 @@
 {
   "dataset_name": "benchmark-research",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "status": "dataset_release_candidate",
   "license": "cc-by-4.0",
   "hf_repo": "sselaine27/benchmark-research",
@@ -24,12 +24,12 @@
     "A2-F_ready": 98,
     "A2-T_ready": 161,
     "A2-H_ready": 96,
-    "B_ready": 66,
+    "B_ready": 68,
     "C_ready": 176,
     "D_ready": 12,
     "E_ready": 12,
     "template_records": 94,
-    "total_ready_records": 849
+    "total_ready_records": 851
   },
   "paper_temporal": {
     "index": "data/task_temporal_index.jsonl",
@@ -42,15 +42,15 @@
     "experiment_as_of": "2026-08-17",
     "counts": {
       "T1": 404,
-      "T2": 421,
+      "T2": 423,
       "quarantine": 0,
       "D": 12,
       "E": 12
     },
     "official_temporal_eligible_counts": {
-      "T1": 356,
-      "T2": 288,
-      "note": "C modeled filing-lag availability and B macro without evidence are excluded"
+      "T1": 292,
+      "T2": 243,
+      "note": "Counts require observed evidence, official_temporal_eligible=true, and review_status=reviewed"
     }
   },
   "validation": {
@@ -59,13 +59,13 @@
   },
   "temporal_split": {
     "script": "scripts/assign_time_bands.py",
-    "command": "python scripts/assign_time_bands.py --training-cutoff 2024-06-30 --current-date 2026-08-08 --in-place",
+    "command": "python scripts/assign_time_bands.py --training-cutoff 2024-06-30 --current-date 2026-08-17 --in-place",
     "model_training_cutoff": "2024-06-30",
-    "reference_current_date": "2026-08-08",
+    "reference_current_date": "2026-08-17",
     "rule": "legacy time_band on cutoff_date only; paper experiments use paper_band from task_temporal_index",
     "counts": {
       "T1": 420,
-      "T2": 425,
+      "T2": 427,
       "T3": 4
     }
   },
@@ -78,5 +78,5 @@
     "file": "calibration/leakage_probe_v1.json",
     "manifest": "calibration/leakage_probe_manifest.json"
   },
-  "notes": "v0.7.0: GPT-4.1 June 2024 cutoff is conservatively month-end; 26 guard-window rows removed. HF rows include auditable paper temporal fields. Modeled C availability remains ineligible for the official score."
+  "notes": "v0.8.0: 7 official-source B macro events replace 5 legacy rows; official scoring now requires reviewed observed evidence. Yahoo fundamentals are research-only/non-PIT. aligned_v1 contains 14 strict cutoff pairs and at least 50 paired observations per market/task."
 }

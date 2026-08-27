@@ -15,8 +15,12 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.data.providers.yahoo import YahooPriceProvider
-from src.data.yahoo_fundamentals import YahooFundamentals
-from src.temporal.outcome_enrichment import enrich_b_outcome, enrich_c_outcome
+from src.data.providers.registry import official_disclosure_provider
+from src.temporal.outcome_enrichment import (
+    enrich_b_outcome,
+    enrich_c_outcome,
+    enrich_price_outcome,
+)
 from src.temporal.paper_bands import (
     DEFAULT_EXPERIMENT_CONFIG,
     PaperExperimentConfig,
@@ -73,7 +77,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--enrich-yahoo",
         action="store_true",
-        help="Use Yahoo to enrich B/C outcome_available_at.",
+        help="Use observed Yahoo prices to enrich A1/A2/B outcome dates.",
+    )
+    parser.add_argument(
+        "--enrich-official",
+        action="store_true",
+        help="Use official disclosure registry/providers for B/C evidence.",
     )
     parser.add_argument(
         "--review-status",
@@ -95,17 +104,21 @@ def _enrich_record(
     record: dict[str, Any],
     *,
     enrich_yahoo: bool,
+    enrich_official: bool,
     price_provider: YahooPriceProvider | None,
-    fundamentals: YahooFundamentals | None,
+    disclosure_providers: dict[str, Any],
 ) -> dict[str, Any]:
-    """Optional Yahoo enrichment for B/C outcome dates."""
-    if not enrich_yahoo:
-        return {}
+    """Optional observed-price and official-disclosure enrichment."""
     category = record.get("category")
-    if category == "B" and record.get("variant") == "earnings":
-        return enrich_b_outcome(record, price_provider)
+    seed = record.get("seed") or {}
+    market = str(seed.get("market") or (record.get("metadata") or {}).get("market") or "CN_A")
+    disclosure = disclosure_providers.get(market) if enrich_official else None
+    if category in {"A1", "A2"} and enrich_yahoo:
+        return enrich_price_outcome(record, price_provider)
+    if category == "B" and (enrich_yahoo or enrich_official):
+        return enrich_b_outcome(record, price_provider, disclosure)
     if category == "C":
-        return enrich_c_outcome(record, fundamentals)
+        return enrich_c_outcome(record, disclosure)
     return {}
 
 
@@ -131,15 +144,23 @@ def main() -> int:
             records.extend(load_jsonl(root / rel))
 
     price_provider = YahooPriceProvider() if args.enrich_yahoo else None
-    fundamentals = YahooFundamentals() if args.enrich_yahoo else None
+    disclosure_providers = (
+        {
+            market: official_disclosure_provider(market)
+            for market in ("CN_A", "US", "HK")
+        }
+        if args.enrich_official
+        else {}
+    )
 
     index_rows: list[dict[str, Any]] = []
     for record in records:
         enrichment = _enrich_record(
             record,
             enrich_yahoo=args.enrich_yahoo,
+            enrich_official=args.enrich_official,
             price_provider=price_provider,
-            fundamentals=fundamentals,
+            disclosure_providers=disclosure_providers,
         )
         index_row = build_index_row(
             record,
@@ -154,6 +175,8 @@ def main() -> int:
             index_row["outcome_available_at_source"] = enrichment[
                 "outcome_available_at_source"
             ]
+        if enrichment.get("forward_trading_days"):
+            index_row["forward_trading_days"] = enrichment["forward_trading_days"]
         index_rows.append(index_row)
 
     output_path = root / args.output

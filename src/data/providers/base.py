@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
-from typing import Protocol
+from typing import Any, Protocol
 
 
 @dataclass(frozen=True)
@@ -13,6 +13,24 @@ class PriceBar:
 
     trading_day: str
     close: float
+
+
+@dataclass(frozen=True)
+class OfficialDisclosure:
+    """One first-party disclosure with reproducibility metadata."""
+
+    market: str
+    stock_code: str
+    report_period: str
+    published_at: str
+    source_url: str
+    source: str
+    document_id: str | None = None
+    title: str | None = None
+    fetched_at: str | None = None
+    content_sha256: str | None = None
+    parser_version: str | None = None
+    fields: dict[str, Any] | None = None
 
 
 def parse_iso_date(value: str) -> date:
@@ -70,3 +88,27 @@ class PriceProvider(Protocol):
         horizon_days: int,
     ) -> PriceBar | None:
         """Close on or before cutoff_date + horizon_days, strictly after cutoff close date if possible."""
+
+
+class DisclosureProvider(Protocol):
+    """First-publication lookup used for filing and event evidence."""
+
+    def find_disclosure(
+        self,
+        symbol: str,
+        market: str,
+        report_period: str,
+        *,
+        form_types: tuple[str, ...] = (),
+    ) -> OfficialDisclosure | None:
+        """Return the earliest official disclosure for an exact report period."""
+
+    def find_event_disclosure(
+        self,
+        symbol: str,
+        market: str,
+        event_date: str,
+        *,
+        max_days: int = 7,
+    ) -> OfficialDisclosure | None:
+        """Return the closest official event disclosure within max_days."""

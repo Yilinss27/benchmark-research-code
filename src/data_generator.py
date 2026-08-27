@@ -21,6 +21,7 @@ from src.builders.b_event_from_csv_builder import build_record as build_b_record
 from src.builders.c_financial_metric_from_csv_builder import _read_prompt_template as read_c_prompt
 from src.builders.c_financial_metric_from_csv_builder import build_record as build_c_record
 from src.data.providers.base import PriceBar, PriceProvider, add_calendar_days, parse_iso_date
+from src.data.providers.official import is_official_url
 from src.data.providers.yahoo import YahooPriceProvider
 from src.data.universe import (
     A1_UNIVERSE,
@@ -204,6 +205,7 @@ def generate_a1(
     provider: PriceProvider,
     *,
     source_name: str = "yahoo",
+    primary_horizon_days: int = 30,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     """Build A1 records for one market and cutoff."""
     parse_iso_date(cutoff_date)
@@ -239,6 +241,13 @@ def generate_a1(
                 "price_90d": _optional_price(forward[90]),
                 "price_180d": _optional_price(forward[180]),
                 "price_365d": _optional_price(forward[365]),
+                "primary_eval_window_days": str(primary_horizon_days),
+                **{
+                    f"forward_trading_day_{horizon}": (
+                        bar.trading_day if bar is not None else ""
+                    )
+                    for horizon, bar in forward.items()
+                },
             }
         )
 
@@ -320,6 +329,7 @@ def _collect_a2_price_stocks(
             "prices": [{"trading_day": bar.trading_day, "close_price": bar.close} for bar in bars],
             "actual_return": (forward_bar.close - cutoff_bar.close) / cutoff_bar.close,
             "cutoff_price": cutoff_bar.close,
+            "forward_trading_day": forward_bar.trading_day,
         }
     return stocks, skipped, warnings
 
@@ -381,6 +391,19 @@ def _ready_only(records: list[dict[str, Any]], task_label: str) -> tuple[list[di
         else:
             warnings.append(f"{task_label} {record['task_id']} emitted as {record['status']}; dropped")
     return ready, warnings
+
+
+def _stamp_fundamentals_source(
+    records: list[dict[str, Any]],
+    fundamentals: Any,
+) -> list[dict[str, Any]]:
+    """Record whether fundamentals are official PIT or research-only."""
+    tier = str(getattr(fundamentals, "source_tier", "unknown"))
+    for record in records:
+        metadata = record.setdefault("metadata", {})
+        metadata["fundamentals_source_tier"] = tier
+        metadata["fundamentals_source"] = fundamentals.__class__.__name__
+    return records
 
 
 def generate_a2_t(
@@ -489,7 +512,14 @@ def generate_a2_f(
             "industry_name": spec["industry_name"],
             "cutoff_date": cutoff_date,
             "prediction_window_days": prediction_window_days,
-            "stocks": [{"code": stock["code"], "name": stock["name"]} for stock in usable.values()],
+            "stocks": [
+                {
+                    "code": stock["code"],
+                    "name": stock["name"],
+                    "forward_trading_day": stock["forward_trading_day"],
+                }
+                for stock in usable.values()
+            ],
         }
 
     records, builder_warnings = build_a2f_records(
@@ -501,6 +531,7 @@ def generate_a2_f(
         market=market,
         currency=currency,
     )
+    records = _stamp_fundamentals_source(records, fund)
     warnings.extend(builder_warnings)
     ready, drop_warnings = _ready_only(records, "A2-F")
     warnings.extend(drop_warnings)
@@ -566,6 +597,7 @@ def generate_a2_h(
         market=market,
         currency=currency,
     )
+    records = _stamp_fundamentals_source(records, fund)
     warnings.extend(builder_warnings)
     ready, drop_warnings = _ready_only(records, "A2-H")
     warnings.extend(drop_warnings)
@@ -623,6 +655,102 @@ def _adjacent_closes(
                 nxt = candidate
                 break
     return prev, nxt
+
+
+def _event_reaction_closes(
+    provider: PriceProvider,
+    symbol: str,
+    market: str,
+    event_date: str,
+    release_phase: str,
+) -> tuple[PriceBar | None, PriceBar | None]:
+    """Return the pre-event baseline and first close able to reflect the release."""
+    bars = provider.get_price_history(
+        symbol,
+        market,
+        add_calendar_days(event_date, -21),
+        add_calendar_days(event_date, 21),
+    )
+    previous = [bar for bar in bars if bar.trading_day < event_date]
+    baseline = previous[-1] if previous else provider.get_close_on_or_before(
+        symbol, market, add_calendar_days(event_date, -1)
+    )
+    if release_phase in {"pre_market", "market_hours"}:
+        reactions = [bar for bar in bars if bar.trading_day >= event_date]
+    else:
+        reactions = [bar for bar in bars if bar.trading_day > event_date]
+    return baseline, reactions[0] if reactions else None
+
+
+def generate_b_macro(
+    config_path: Path | str,
+    provider: PriceProvider,
+    *,
+    source_name: str = "official_macro_v1",
+) -> tuple[list[dict[str, Any]], list[str]]:
+    """Build curated macro records using first-party releases and observed closes."""
+    payload = json.loads(Path(config_path).read_text(encoding="utf-8"))
+    template = read_b_prompt()
+    records: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    seen_ids: set[str] = set()
+    for event in payload.get("events", []):
+        task_id = str(event.get("event_id") or "")
+        market = str(event.get("market") or "")
+        code = str(event.get("stock_code") or "")
+        event_date = str(event.get("event_date") or "")
+        event_url = str(event.get("event_url") or "")
+        if not task_id or task_id in seen_ids:
+            warnings.append(f"B macro duplicate/missing event_id: {task_id!r}; skipped")
+            continue
+        if market not in SUPPORTED_MARKETS or not event_date:
+            warnings.append(f"B macro {task_id}: invalid market/date; skipped")
+            continue
+        if not is_official_url(event_url, "MACRO"):
+            warnings.append(f"B macro {task_id}: non-official event URL; skipped")
+            continue
+        try:
+            parse_iso_date(event_date)
+            baseline, reaction = _event_reaction_closes(
+                provider,
+                code,
+                market,
+                event_date,
+                str(event.get("release_phase") or "after_market"),
+            )
+        except Exception as exc:
+            warnings.append(f"B macro {task_id}: price error ({exc}); skipped")
+            continue
+        if baseline is None or reaction is None or baseline.close == 0:
+            warnings.append(f"B macro {task_id}: missing baseline/reaction close; skipped")
+            continue
+        return_pct = (reaction.close - baseline.close) / baseline.close * 100.0
+        if return_pct == 0:
+            warnings.append(f"B macro {task_id}: zero event return; skipped")
+            continue
+        row = {
+            **{key: str(value) for key, value in event.items() if value is not None},
+            "event_id": task_id,
+            "event_subtype": "macro",
+            "cutoff_date": event_date,
+            "actual_direction": "up" if return_pct > 0 else "down",
+            "actual_return_pct": f"{return_pct:.6f}",
+            "baseline_trading_day": baseline.trading_day,
+            "reaction_trading_day": reaction.trading_day,
+        }
+        record = build_b_record(
+            row,
+            template,
+            source_name,
+            market=market,
+            currency=str(event.get("currency") or currency_for_market(market)),
+        )
+        record["metadata"]["outcome_available_at_source"] = (
+            "observed_yahoo_release_adjusted_close"
+        )
+        records.append(record)
+        seen_ids.add(task_id)
+    return records, warnings
 
 
 def _earnings_description(stock_name: str, stock_code: str, event: dict[str, Any]) -> str:
@@ -748,7 +876,17 @@ def generate_c(
                 "report_period_future": pair["report_period_future"],
                 "future_value": f"{pair['future_value']:.4f}",
             }
-            records.append(build_c_record(row, template, source_name, market=market, currency=currency))
+            record = build_c_record(
+                row, template, source_name, market=market, currency=currency
+            )
+            record["metadata"]["fundamentals_source"] = fund.__class__.__name__
+            record["metadata"]["fundamentals_source_tier"] = str(
+                getattr(fund, "source_tier", "unknown")
+            )
+            record["metadata"]["statement_freq"] = pair.get(
+                "statement_freq", "quarterly"
+            )
+            records.append(record)
 
     return records, warnings
 
@@ -810,6 +948,7 @@ def _stamp_panel_metadata(
     panel_id: str | None,
     horizon_days: int,
     cutoff_date: str,
+    pair_id: str | None = None,
 ) -> list[dict[str, Any]]:
     """Attach panel tags used by aligned-panel validation."""
     if not panel_id:
@@ -821,6 +960,8 @@ def _stamp_panel_metadata(
         metadata["panel"] = panel_id
         metadata["panel_horizon_days"] = horizon_days
         metadata["panel_cutoff_date"] = cutoff_date
+        if pair_id:
+            metadata["panel_pair_id"] = pair_id
         row["metadata"] = metadata
         stamped.append(row)
     return stamped
@@ -839,6 +980,7 @@ def generate(
     current_date: str = DEFAULT_CURRENT_DATE,
     horizon_days: int = A2_PREDICTION_WINDOW_DAYS,
     panel_id: str | None = None,
+    pair_id: str | None = None,
 ) -> dict[str, Any]:
     """Generate records and write them to output."""
     if task not in TASK_HANDLERS:
@@ -849,6 +991,8 @@ def generate(
     provider = _provider(provider_name)
     handler, identity_fn = TASK_HANDLERS[task]
     handler_kwargs: dict[str, Any] = {"source_name": provider_name}
+    if task == "A1":
+        handler_kwargs["primary_horizon_days"] = horizon_days
     if task in {"A2-T", "A2-F", "A2-H"}:
         handler_kwargs["prediction_window_days"] = horizon_days
     generated, warnings = handler(market, cutoff_date, provider, **handler_kwargs)
@@ -857,6 +1001,7 @@ def generate(
         panel_id=panel_id,
         horizon_days=horizon_days,
         cutoff_date=cutoff_date,
+        pair_id=pair_id,
     )
     generated = _assign_bands(generated, training_cutoff, current_date)
     output_path = Path(output)
@@ -887,6 +1032,7 @@ def generate_panel(
     provider_name: str = "yahoo",
     output_dir: str | Path = "seeds/aligned",
     panel_id: str = "aligned_v1",
+    pair_id: str | None = None,
     append: bool = True,
     replace: bool = True,
     training_cutoff: str = DEFAULT_TRAINING_CUTOFF,
@@ -916,6 +1062,7 @@ def generate_panel(
                 current_date=current_date,
                 horizon_days=horizon_days,
                 panel_id=panel_id,
+                pair_id=pair_id,
             )
             jobs.append(summary)
     return {

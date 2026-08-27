@@ -246,6 +246,11 @@ def build_records(
                 "actual_returns": ordered_returns,
                 "actual_ranking": _actual_ranking(ordered_returns),
                 "prediction_window_days": cohort["prediction_window_days"],
+                "forward_trading_days": {
+                    stock["code"]: stock["forward_trading_day"]
+                    for stock in stock_list
+                    if stock.get("forward_trading_day")
+                },
             }
 
         record = {
@@ -264,6 +269,14 @@ def build_records(
                 "fundamentals_dict": fundamentals_dict,
                 "market": market,
                 "currency": currency,
+                "outcome_trading_day": max(
+                    (
+                        stock["forward_trading_day"]
+                        for stock in stock_list
+                        if stock.get("forward_trading_day")
+                    ),
+                    default=None,
+                ),
             },
             "prompt": _render_prompt(
                 prompt_template,

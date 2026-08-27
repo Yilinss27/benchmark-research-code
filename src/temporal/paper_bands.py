@@ -14,6 +14,22 @@ from src.data.yahoo_fundamentals import ANNUAL_LAG_DAYS, QUARTER_LAG_DAYS
 
 PAPER_BANDS = frozenset({"T1", "T2", "T3", "quarantine", "D", "E"})
 REVIEW_STATUSES = frozenset({"draft", "reviewed"})
+TEMPORAL_FLATTEN_FIELDS = (
+    "forecast_origin",
+    "forecast_origin_source",
+    "outcome_available_at",
+    "outcome_available_at_source",
+    "outcome_evidence_url",
+    "outcome_evidence_code",
+    "paper_band",
+    "paper_band_reason",
+    "review_status",
+    "review_method",
+    "reviewed_at",
+    "evidence_hash",
+    "quality_flags",
+    "official_temporal_eligible",
+)
 
 CATEGORY_TO_HF_CONFIG = {
     "A1": "a1",
@@ -117,6 +133,9 @@ def _quality_flags(
                 break
         if metadata.get("fundamentals_match_mode") == "prototype_fallback_nearest":
             flags.append("prototype_fallback_fundamentals")
+        source = str(metadata.get("fundamentals_source") or metadata.get("source") or "")
+        if "yahoo" in source.lower() and metadata.get("fundamentals_source_tier") != "official_filing":
+            flags.append("non_pit_fundamentals")
 
     if category in {"B", "C"}:
         has_evidence = bool(
@@ -127,6 +146,11 @@ def _quality_flags(
         )
         if not has_evidence:
             flags.append("missing_outcome_evidence")
+    if category == "C":
+        tier = str(metadata.get("fundamentals_source_tier") or "")
+        source = str(metadata.get("fundamentals_source") or metadata.get("source") or "")
+        if (tier and tier != "official_filing") or "yahoo" in source.lower():
+            flags.append("non_pit_fundamentals")
 
     return sorted(set(flags))
 
@@ -215,12 +239,26 @@ def infer_temporal_fields(
 
     if category == "A1":
         origin = forecast_origin or str(seed.get("cutoff_date"))
+        ground_truth = record.get("ground_truth") or {}
+        primary_window = int(
+            ground_truth.get("primary_eval_window_days")
+            or seed.get("primary_eval_window_days")
+            or metadata.get("panel_horizon_days")
+            or A1_OUTCOME_HORIZON_DAYS
+        )
+        observed_days = ground_truth.get("forward_trading_days") or metadata.get(
+            "forward_trading_days"
+        ) or {}
+        observed = observed_days.get(str(primary_window))
         if outcome_available_at:
             outcome = outcome_available_at
             source = "provided"
+        elif observed:
+            outcome = str(observed)
+            source = "observed_forward_trading_day"
         else:
-            outcome = add_calendar_days(origin, A1_OUTCOME_HORIZON_DAYS)
-            source = f"cutoff_plus_{A1_OUTCOME_HORIZON_DAYS}d"
+            outcome = add_calendar_days(origin, primary_window)
+            source = f"modeled_cutoff_plus_{primary_window}d"
         return {
             "forecast_origin": origin,
             "forecast_origin_source": "seed.cutoff_date",
@@ -233,12 +271,16 @@ def infer_temporal_fields(
     if category == "A2":
         origin = forecast_origin or str(seed.get("cutoff_date"))
         window = int(seed.get("prediction_window_days") or A2_PREDICTION_WINDOW_DAYS)
+        observed = metadata.get("outcome_trading_day")
         if outcome_available_at:
             outcome = outcome_available_at
             source = "provided"
+        elif observed:
+            outcome = str(observed)
+            source = "observed_forward_trading_day"
         else:
             outcome = add_calendar_days(origin, window)
-            source = f"cutoff_plus_{window}d"
+            source = f"modeled_cutoff_plus_{window}d"
         return {
             "forecast_origin": origin,
             "forecast_origin_source": "seed.cutoff_date",
@@ -337,6 +379,11 @@ def build_index_row(
             "fundamentals_after_origin",
             "missing_outcome_evidence",
             "modeled_outcome_availability",
+            "non_pit_fundamentals",
+            "official_disclosure_lookup_failed",
+            "official_event_lookup_failed",
+            "missing_event_evidence",
+            "missing_forward_trading_day",
         }
         for flag in flags
     )
@@ -391,7 +438,9 @@ def merge_index_by_task_id(
         temporal = index.get(record["task_id"])
         if temporal:
             row["paper_temporal"] = temporal
-            row["paper_band"] = temporal.get("paper_band")
+            for field in TEMPORAL_FLATTEN_FIELDS:
+                if field in temporal:
+                    row[field] = temporal[field]
         merged.append(row)
     return merged
 

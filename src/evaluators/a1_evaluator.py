@@ -62,6 +62,12 @@ def evaluate_a1(parsed: dict[str, Any], record: dict[str, Any]) -> dict[str, Any
     """Evaluate a parsed A1 prediction against future price windows."""
     ground_truth = record.get("ground_truth") or {}
     actual_prices = ground_truth.get("actual_prices") or {}
+    primary_window = int(
+        ground_truth.get("primary_eval_window_days")
+        or (record.get("seed") or {}).get("primary_eval_window_days")
+        or (record.get("metadata") or {}).get("primary_eval_window_days")
+        or 30
+    )
     base = parsed.get("base")
     bear = parsed.get("bear")
     bull = parsed.get("bull")
@@ -93,5 +99,6 @@ def evaluate_a1(parsed: dict[str, Any], record: dict[str, Any]) -> dict[str, Any
         "format_valid": bool(parsed.get("format_valid")),
         "monotonic_valid": monotonic_valid,
         "by_window": by_window,
+        "primary_eval_window_days": primary_window,
         "reversion_horizon_hit": _compute_reversion_horizon_hit(parsed, actual_prices),
     }

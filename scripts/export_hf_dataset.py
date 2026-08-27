@@ -59,6 +59,9 @@ def attach_paper_temporal_fields(
         "paper_band",
         "paper_band_reason",
         "review_status",
+        "review_method",
+        "reviewed_at",
+        "evidence_hash",
         "quality_flags",
         "official_temporal_eligible",
         "backbone_training_cutoff",
@@ -134,12 +137,21 @@ t2 = a1["train"].filter(lambda x: x["time_band"] == "T2")
 可用 config：`a1` / `a2_f` / `a2_t` / `a2_h` / `b` / `c` / `d` / `e`  
 默认 config 为 `a1`。
 
-## 规模（v0.7.0）
+## 规模（v0.8.0）
 
 | config | ready 条数 |
 |--------|-----------|
 {table}
 | **合计** | **{total}** |
+
+### 实验身份（paper 主口径）
+
+- `backbone_model = gpt-4.1`
+- `backbone_training_cutoff = 2024-06-30`（OpenAI 仅声明 “June 2024”；本库按月末保守处理）
+- `guard_days = 30` → T1 outcome ≤ `2024-05-31`，T2 origin ≥ `2024-07-30`
+- `experiment_as_of = 2026-08-17`
+
+**不兼容声明：** 旧 Hub pin（339 题 / `model_training_cutoff=2024-06-01`）为 legacy identity，不得与 v0.8 paper_band / C1 表混比。
 
 ## 字段说明
 
@@ -151,7 +163,7 @@ t2 = a1["train"].filter(lambda x: x["time_band"] == "T2")
 | `category` | A1 / A2 / B / C / D / E |
 | `variant` | 子变体（如 F/T/H、earnings） |
 | `cutoff_date` | 用于时间分层的截止日期 |
-| `time_band` | T1 / T2 / T3 |
+| `time_band` | T1 / T2 / T3（legacy；论文请用 `paper_band`） |
 | `forecast_origin` | 预测时点 |
 | `outcome_available_at` | 结果可用日；结合 `outcome_available_at_source` 判断是否为观测值或估计值 |
 | `paper_band` | GPT-4.1 论文口径 T1 / T2 / T3 / D / E |
@@ -164,18 +176,18 @@ t2 = a1["train"].filter(lambda x: x["time_band"] == "T2")
 
 ## 时间分层
 
-本数据集按可复算规则标注 `time_band`：
+本数据集按可复算规则标注 legacy `time_band`（仅按 `cutoff_date`）：
 
 - `T1`：`cutoff_date <= model_training_cutoff`，可能存在预训练数据泄露
 - `T2`：`model_training_cutoff < cutoff_date < reference_current_date`
 - `T3`：`cutoff_date >= reference_current_date`，用于未来预测能力测试
 
-默认发布参数：
+默认 legacy 参数（与 paper 身份对齐 cutoff 月，但规则不同）：
 
-- `model_training_cutoff = 2024-06-30`（GPT-4.1 的 “June 2024” 按月末保守处理）
-- `reference_current_date = 2026-08-08`
+- `model_training_cutoff = 2024-06-30`
+- `reference_current_date = 2026-08-17`
 
-每条记录的 `metadata.temporal_split` 保存了实际使用的 cutoff、规则与日期来源。不同模型训练截止日不同，严谨评估时应基于该模型的训练截止日重新切分。
+论文实验请使用侧车 `paper_band`（见代码仓 `docs/schema.md` / `docs/c1_pairing_contract.md`），不要直接用 legacy `time_band` 做 C1。
 
 ## 仓库边界
 

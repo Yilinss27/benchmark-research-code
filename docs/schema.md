@@ -38,7 +38,7 @@
     "cutoff_date_source": "seed.cutoff_date",
     "is_synthetic_cutoff_date": false,
     "model_training_cutoff": "2024-06-30",
-    "reference_current_date": "2026-08-08",
+    "reference_current_date": "2026-08-17",
     "rule": "T1: cutoff_date <= model_training_cutoff; T2: model_training_cutoff < cutoff_date < reference_current_date; T3: cutoff_date >= reference_current_date"
   },
   "notes": "可选说明"
@@ -65,7 +65,7 @@ A1 prompt 使用 `{currency_unit}`（`元` / `USD` / `HKD`），避免美股/港
 默认发布参数：
 
 - `model_training_cutoff = 2024-06-30`
-- `reference_current_date = 2026-08-08`
+- `reference_current_date = 2026-08-17`
 
 切分规则：
 
@@ -74,6 +74,8 @@ A1 prompt 使用 `{currency_unit}`（`元` / `USD` / `HKD`），避免美股/港
 - `T3`：`cutoff_date >= reference_current_date`
 
 注意：严格来说，T1/T2 取决于具体模型的训练截止日期。评测不同模型时，应使用 `scripts/assign_time_bands.py` 按该模型训练截止日重新计算。
+
+`2024-06-01` / 339 题旧 Hub pin 属于 legacy identity，仅用于历史复现，不能与当前 v0.8（`gpt-4.1` + `2024-06-30`）结果混表比较。
 
 ## 论文时间几何（paper_band）
 
@@ -86,6 +88,9 @@ A1 prompt 使用 `{currency_unit}`（`元` / `USD` / `HKD`），避免美股/港
 | `outcome_available_at_source` | `observed_*` 为观测日期；`modeled_*` / `heuristic_*` 为估计日期 |
 | `paper_band` | `T1` / `T2` / `T3` / `quarantine` / `D` / `E` |
 | `review_status` | `draft` / `reviewed` |
+| `review_method` | 审核方式；自动审核为 `automated_evidence_validation` |
+| `reviewed_at` | 审核时间 |
+| `evidence_hash` | 审核时关键证据字段的 SHA-256 |
 | `quality_flags` | 如 `modeled_outcome_availability`、`fundamentals_after_origin` |
 | `official_temporal_eligible` | 是否具备进入官方分所需的时间证据 |
 
@@ -112,9 +117,9 @@ python -m src.run_benchmark \
   --agent mock
 ```
 
-官方分（任务等权、仅 T2 且 `official_temporal_eligible=true`）见
-`metrics_summary.json` 中的 `official_score`。当前 C 的 filing-lag 日期为模型估计，
-在补齐真实首次披露日之前不会进入官方分。
+官方分（任务等权）只接受 T2、`official_temporal_eligible=true` 且
+`review_status=reviewed` 的记录。`modeled_*` / `heuristic_*` 可用日、
+`non_pit_fundamentals`、缺失官方事件证据等 blocking flags 均不可晋升 reviewed。
 
 ## `status` 枚举
 

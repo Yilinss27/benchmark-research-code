@@ -31,7 +31,8 @@ def primary_task_score(metrics: dict[str, Any], task_key: str) -> float | None:
         return 0.0
 
     if task_key == "A1":
-        window = metrics.get("by_window", {}).get("90", {})
+        primary_days = int(metrics.get("primary_eval_window_days") or 30)
+        window = metrics.get("by_window", {}).get(str(primary_days), {})
         hit = window.get("range_hit")
         return 1.0 if hit is True else (0.0 if hit is False else None)
 
@@ -63,7 +64,8 @@ def aggregate_official_score(
         prediction
         for prediction in predictions
         if prediction.get("paper_band") == paper_band
-        and prediction.get("official_temporal_eligible", True)
+        and prediction.get("official_temporal_eligible") is True
+        and prediction.get("review_status") == "reviewed"
     ]
 
     by_task: dict[str, list[float]] = {task: [] for task in OFFICIAL_TASKS}

@@ -59,7 +59,9 @@ def _frame_to_nested(frame: Any) -> dict[str, dict[str, float]]:
 
 
 class YahooFundamentals:
-    """Cached Yahoo income/balance statements and earnings dates."""
+    """Historical fundamentals with modeled publication lags (not true PIT)."""
+
+    source_tier = "yahoo_lagged_research_only"
 
     def __init__(self, cache_dir: Path | str = DEFAULT_CACHE_DIR) -> None:
         self.cache_dir = Path(cache_dir)

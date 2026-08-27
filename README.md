@@ -32,16 +32,16 @@ The codebase supports three workflows:
 2. Run LLM / agent baselines on ready records.
 3. Export a data-only Hugging Face package.
 
-The current public dataset contains 339 ready records:
+The current public dataset contains 851 ready records:
 
 | Task | Description | HF config | Ready |
 |------|-------------|-----------|------:|
-| A1 | Single-stock valuation range prediction | `a1` | 72 |
-| A2-F | Cross-sectional ranking with fundamentals | `a2_f` | 10 |
-| A2-T | Cross-sectional ranking with technicals | `a2_t` | 10 |
-| A2-H | Cross-sectional ranking with hybrid signals | `a2_h` | 10 |
-| B | Event-driven direction prediction | `b` | 33 |
-| C | Forward financial metric prediction | `c` | 180 |
+| A1 | Single-stock valuation range prediction | `a1` | 228 |
+| A2-F | Cross-sectional ranking with fundamentals | `a2_f` | 98 |
+| A2-T | Cross-sectional ranking with technicals | `a2_t` | 161 |
+| A2-H | Cross-sectional ranking with hybrid signals | `a2_h` | 96 |
+| B | Event-driven direction prediction | `b` | 68 |
+| C | Forward financial metric prediction | `c` | 176 |
 | D | Counterfactual event reasoning | `d` | 12 |
 | E | Multi-step financial formula calculation | `e` | 12 |
 
@@ -114,7 +114,7 @@ Each ready record has:
 Default split parameters in the current release:
 
 - `model_training_cutoff = 2024-06-30`（GPT-4.1 的 “June 2024” 按月末保守处理）
-- `reference_current_date = 2026-08-08`
+- `reference_current_date = 2026-08-17`
 
 Rules:
 
@@ -122,22 +122,24 @@ Rules:
 - `T2`: `model_training_cutoff < cutoff_date < reference_current_date`
 - `T3`: `cutoff_date >= reference_current_date`
 
-Published Hugging Face distribution (v0.6.0, 339 records):
+Published Hugging Face distribution (v0.8.0, 851 records):
 
 | Time Band | Count | Notes |
 |-----------|------:|-------|
-| T1 | 118 | Includes A1/A2/B/C pairs around `2023-12-29`, plus formula and synthetic D |
-| T2 | 217 | Includes legacy CSV rows and Yahoo pairs around `2026-01-30` |
-| T3 | 4 | Synthetic future counterfactuals; real T3 labels need future data |
+| T1 | 420 | Legacy `time_band` split by `cutoff_date` only |
+| T2 | 427 | Legacy `time_band` split by `cutoff_date` only |
+| T3 | 4 | Legacy `time_band` split by `cutoff_date` only |
 
-A1 records for `2026-01-30` leave the 365-day window as null because that date is not realized yet. A2-F/H, B (earnings), and C now have Yahoo-backed T1/T2 pairs on CN_A / US / HK in addition to the older CSV rows.
+A1 records for `2026-01-30` leave the 365-day window as null because that date is not realized yet. Paper experiments should use `paper_band` from `data/task_temporal_index.jsonl` instead of this legacy split.
+
+Legacy Hub pin (`v0.6.0`, 339 records, `model_training_cutoff=2024-06-01`) is preserved for historical reproducibility only and is not directly comparable to the current v0.8 paper identity.
 
 For a model with a different training cutoff, recompute the split:
 
 ```bash
 python scripts/assign_time_bands.py \
   --training-cutoff 2024-06-30 \
-  --current-date 2026-08-08 \
+  --current-date 2026-08-17 \
   --in-place
 ```
 
@@ -148,7 +150,7 @@ python -m src.run_benchmark \
   --seed hf_dataset/data/e/train.jsonl \
   --agent mock \
   --model-training-cutoff 2024-06-30 \
-  --current-date 2026-08-08 \
+  --current-date 2026-08-17 \
   --output results/mock_e_temporal
 ```
 
@@ -174,6 +176,7 @@ After building records:
 
 ```bash
 python scripts/assign_time_bands.py --in-place
+python scripts/backfill_c_official_values.py
 python scripts/validate.py
 python scripts/export_hf_dataset.py --clean
 ```
@@ -225,6 +228,7 @@ python -m src.run_benchmark \
 ```
 
 See [`docs/temporal_changelog.md`](docs/temporal_changelog.md) for paper_band counts.
+See [`docs/c1_pairing_contract.md`](docs/c1_pairing_contract.md) for frozen T1/T2 pairing keys and C1 claim boundaries.
 
 Yahoo ticker mapping:
 
@@ -234,9 +238,9 @@ Yahoo ticker mapping:
 | `US` | `AAPL` | `AAPL` |
 | `HK` | `0700` | `0700.HK` |
 
-Daily closes, statements, and earnings dates are cached under `data/cache/yahoo/` (gitignored). Yahoo is unofficial and not a true point-in-time fundamentals feed. This round approximates filing availability with a reporting lag: quarterly statements are treated as public 45 calendar days after period end, annual statements after 100 days. Yahoo quarterly history is short (~5 periods), so T1 A2-F/H/C usually fall back to annual statements.
+Daily closes, statements, and earnings dates are cached under `data/cache/yahoo/` (gitignored). Yahoo prices provide observed trading days, but Yahoo fundamentals are not a true point-in-time feed. They are marked `non_pit_fundamentals`, retained for research, and excluded from the official score. Official disclosure dates and event URLs come from SEC EDGAR, CNINFO/HKEX reviewed registries, BLS, China NBS, and Hong Kong C&SD.
 
-Out of scope this round: real T3 labels (future prices are not realized yet) and a large B macro set.
+Out of scope this round: real T3 labels whose future outcomes are not yet realized.
 
 ## Temporal Leakage Papers
 
@@ -292,7 +296,10 @@ results/     # benchmark outputs
 
 ## Future Data Interface Plan
 
-A1 / A2 / B (earnings) / C can be generated from Yahoo Finance (`python -m src.data_generator`). Yahoo financials are lagged, not a vendor PIT tape; B macro events and true T3 labels are still out of scope. Candidate paid PIT providers are tracked in [`TODO.md`](TODO.md).
+A1 / A2 / B (earnings) / C can be generated with `python -m src.data_generator`.
+The official path combines observed prices with first-party filing/event evidence. Seven curated
+B-macro events are generated by `scripts/rebuild_b_macro.py`; unresolved filing evidence stays
+`draft`/ineligible instead of being promoted from a modeled lag.
 
 ## License
 

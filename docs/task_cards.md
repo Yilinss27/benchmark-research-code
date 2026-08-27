@@ -33,6 +33,8 @@
 
 **Ground Truth 来源**  
 cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行情数据离线填充。
+官方主指标默认使用 30 天窗口，并保存目标窗口对应的实际 `forward_trading_day`；
+90/180/365 天仅作为辅助分析窗口。
 
 **评测指标**
 
@@ -91,7 +93,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 | `industry_name` | `str` | 行业名称 |
 | `stock_list` | `list[{code, name}]` | 股票列表，建议 N ∈ [6, 15] |
 | `cutoff_date` | `str` | 信息截止日期 |
-| `prediction_window_days` | `int` | 预测窗口（交易日） |
+| `prediction_window_days` | `int` | 预测窗口（日历日；结果落到实际交易日） |
 | `signal_variant` | `str` | `F` / `T` / `H` |
 | `market` | `str` | `CN_A` / `US` / `HK` |
 | `currency` | `str` | `CNY` / `USD` / `HKD` |
@@ -113,7 +115,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - Top-K Hit Rate（K = floor(N/3)）
 - Long-Short Spread
 
-**当前实现状态**：ready（`seeds/a2_fundamentals.jsonl`、`seeds/a2_technical.jsonl`、`seeds/a2_hybrid.jsonl`）。A2-F/T/H 均可由 `data_generator` 按市场/cutoff 配对生成。Yahoo 财务使用报告滞后期（季报 +45 天、年报 +100 天）近似 PIT；季报窗口不足时回退年报。CSV 路径仍可用于旧 cohort。
+**当前实现状态**：ready（`seeds/a2_fundamentals.jsonl`、`seeds/a2_technical.jsonl`、`seeds/a2_hybrid.jsonl`）。A2-F/T/H 均可由 `data_generator` 按市场/cutoff 配对生成。Yahoo 财务仅为 lagged research 数据，会标记 `non_pit_fundamentals` 并排除官方分；官方路径要求截止日前已经公开的 filing snapshot。
 
 ---
 
@@ -143,6 +145,9 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 | `stock_name` | `str` | 股票名称 |
 | `market` | `str` | `CN_A` / `US` / `HK` |
 | `currency` | `str` | `CNY` / `USD` / `HKD` |
+| `event_url` | `str` | 官方发布或交易所披露页面 |
+| `release_timestamp` | `str` | 带时区的发布时间（macro） |
+| `release_phase` | `str` | `pre_market` / `market_hours` / `after_market` / `non_trading_day` |
 
 **输出格式**
 
@@ -161,7 +166,9 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - Directional Accuracy
 - Brier Score
 
-**当前实现状态**：ready。保留原 CSV 的 earnings/macro 题；Yahoo 路径为 CN_A/US/HK 补 T1/T2 财报事件（`cutoff_date = event_date`，收益用事件日前收盘到下一交易日收盘）。macro 大规模扩充仍待补。
+**当前实现状态**：ready。7 条 macro 来自 BLS、国家统计局和香港政府统计处；
+盘前/盘中发布使用当日收盘，盘后/非交易日发布使用下一交易日收盘。Earnings
+仅在匹配到 SEC/CNINFO/HKEX 官方公告后才能晋升为官方可用。
 
 ---
 

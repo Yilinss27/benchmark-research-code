@@ -49,6 +49,16 @@ READY_FILES = [
 TEMPLATE_GLOB = "seeds/templates/*.jsonl"
 TIME_BANDS = {"T1", "T2", "T3"}
 PAPER_BANDS = {"T1", "T2", "T3", "quarantine", "D", "E"}
+REVIEW_BLOCKING_FLAGS = {
+    "fundamentals_after_origin",
+    "missing_event_evidence",
+    "missing_outcome_evidence",
+    "missing_forward_trading_day",
+    "modeled_outcome_availability",
+    "non_pit_fundamentals",
+    "official_disclosure_lookup_failed",
+    "official_event_lookup_failed",
+}
 TEMPORAL_INDEX_DEFAULT = "data/task_temporal_index.jsonl"
 
 
@@ -78,6 +88,24 @@ def validate_temporal_index(root: Path, index_path: Path, seed_task_ids: set[str
         if row.get("review_status") == "reviewed":
             if not row.get("outcome_evidence_code") and not row.get("outcome_evidence_url"):
                 errors.append(f"{prefix} reviewed row missing outcome evidence")
+            blocking = sorted(
+                set(row.get("quality_flags") or []) & REVIEW_BLOCKING_FLAGS
+            )
+            if blocking:
+                errors.append(
+                    f"{prefix} reviewed row has blocking quality flags: {blocking}"
+                )
+            source = str(row.get("outcome_available_at_source") or "")
+            if source.startswith(("modeled_", "heuristic_")):
+                errors.append(
+                    f"{prefix} reviewed row uses non-observed availability: {source}"
+                )
+        eligible = row.get("official_temporal_eligible")
+        blocking = set(row.get("quality_flags") or []) & REVIEW_BLOCKING_FLAGS
+        if eligible is True and blocking:
+            errors.append(
+                f"{prefix} eligible row has blocking quality flags: {sorted(blocking)}"
+            )
         index_ids.add(row["task_id"])
 
     missing = sorted(seed_task_ids - index_ids)

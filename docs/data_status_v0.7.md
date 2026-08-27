@@ -1,6 +1,6 @@
-# Benchmark Research 数据现状（v0.7.0）
+# Benchmark Research 数据现状（v0.8.0）
 
-**版本：** v0.7.0（release candidate）  
+**版本：** v0.8.0（release candidate）
 **代码仓：** [Yilinss27/benchmark-research-code](https://github.com/Yilinss27/benchmark-research-code)  
 **数据仓：** [sselaine27/benchmark-research](https://huggingface.co/datasets/sselaine27/benchmark-research)  
 **统计日：** 2026-08-27
@@ -9,7 +9,7 @@
 
 ## 1. 概览
 
-当前正式题库 **849** 条 `ready`（已剔除 quarantine）。另有跨时间对齐实验面板 **aligned_v1**（100 条，不覆盖主库）。
+当前正式题库 **851** 条 `ready`。另有跨时间对齐实验面板 **aligned_v1**（1,744 条，不覆盖主库）。
 
 | 能力 | 现状 |
 |------|------|
@@ -20,8 +20,9 @@
 | **面板生成** | `python -m src.data_generator --panel --cutoff-date … --horizon 30` |
 | 官方分 | 仅聚合 **T2**，任务等权 |
 
-论文时间带原始规模：**T1 = 404**，**T2 = 421**；其中具备官方时间证据的
-**T1 = 356、T2 = 288**。A2-F / A2-H 的论文 T1 各 **32**（≥30）。
+论文时间带原始规模：**T1 = 404**，**T2 = 423**。同时满足观测证据、
+`official_temporal_eligible=true` 与 `review_status=reviewed` 的记录为
+**T1 = 292、T2 = 243**。A2-F / A2-H 的论文 T1 各 **32**（≥30）。
 
 主库 T1/T2 **总量够但结构不对称**（详见 [`docs/t1_t2_alignment_gaps.md`](t1_t2_alignment_gaps.md)）。可横比实验请用 aligned panel。
 
@@ -35,11 +36,11 @@
 | A2-F | 98 | **32** | 66 | 基本面排序 |
 | A2-T | 161 | 95 | 66 | 技术面排序 |
 | A2-H | 96 | **32** | 64 | 混合排序 |
-| B | 66 | 15 | 51 | 事件（earnings 为主） |
+| B | 68 | 15 | 53 | earnings + 7 条官方 macro |
 | C | 176 | 48 | 128 | 财务指标 |
 | D | 12 | — | — | 反事实探针（`paper_band=D`） |
 | E | 12 | — | — | 公式探针（`paper_band=E`） |
-| **合计** | **849** | **404** | **421** | quarantine = 0 |
+| **合计** | **851** | **404** | **423** | quarantine = 0 |
 
 `python scripts/validate.py`：通过。
 
@@ -51,7 +52,7 @@
 | A2-F | 50 | 24 | 24 |
 | A2-T | 82 | 40 | 39 |
 | A2-H | 48 | 24 | 24 |
-| B | 43 | 11 | 12 |
+| B | 41 | 13 | 14 |
 | C | 156 | 10 | 10 |
 
 ---
@@ -70,6 +71,8 @@
 
 **Guard days：** 训练截止日与实验日两侧各留 30 天缓冲，避免边界泄漏。GPT-4.1 的知识截止只精确到月份，因此不能假设为 6 月 1 日；改用 6 月 30 日后，新增落入空白带的 26 条题已删除，当前无 quarantine。
 
+旧 Hub pin（339 题，`model_training_cutoff=2024-06-01`）属于 legacy identity，仅用于历史复现，不与当前 v0.8 结果混表。
+
 | 字段 | 用途 |
 |------|------|
 | legacy `time_band` | 仅按 `cutoff_date` 粗分，兼容旧流程 |
@@ -87,20 +90,20 @@
 |----|------|
 | 题型 | A1, A2-F, A2-T, A2-H |
 | 市场 | CN_A / US / HK |
-| T1 cutoff | `2023-12-29` |
-| T2 cutoff | `2025-12-31`（25 年底窗） |
+| cutoff | 14 组显式 T1↔T2 配对，包含 `2025-12-31` 锚点 |
 | horizon | 30 天 |
-| 产出 | `seeds/aligned/`（**不改主库 849**） |
-| 规模 | **T1=50 / T2=50**，结构对称 |
+| 产出 | `seeds/aligned/`（**不改主库 851**） |
+| 规模 | **T1=872 / T2=872**，逐 pair 结构对称 |
 
 | 题型 | T1 | T2 |
 |------|---:|---:|
-| A1 | 26 | 26 |
-| A2-F | 8 | 8 |
-| A2-T | 8 | 8 |
-| A2-H | 8 | 8 |
+| A1 | 392 | 392 |
+| A2-F | 156 | 156 |
+| A2-T | 168 | 168 |
+| A2-H | 156 | 156 |
 
-同一股票池 / cohort，仅 cutoff 不同，可直接做 T1↔T2 横比。
+同一 `panel_pair_id` 内股票集合和 cohort 完全对齐，仅 cutoff 不同；同一 band
+的 30 天窗口内部不重叠。每个市场×题型两侧累计均 ≥50。
 
 ```bash
 # 生成（换 cutoff 只改配置或 CLI）
@@ -115,10 +118,13 @@ python -m src.data_generator --panel --cutoff-date 2025-12-31 \
 python scripts/classify_paper_temporal.py \
   --seed-dir seeds/aligned \
   --output data/aligned_task_temporal_index.jsonl \
-  --report data/aligned_paper_temporal_report.json
+  --report data/aligned_paper_temporal_report.json \
+  --enrich-yahoo --enrich-official
+python scripts/review_temporal_index.py \
+  --index data/aligned_task_temporal_index.jsonl
 python scripts/validate_aligned_panel.py
 
-# mock 冒烟（T1 / T2 各 50 题，结构一致）
+# mock 冒烟（T1 / T2 结构一致）
 python -m src.run_benchmark --seed seeds/aligned/all.jsonl --agent mock \
   --temporal-index data/aligned_task_temporal_index.jsonl --paper-band T1 \
   --output results/aligned_smoke_t1
@@ -135,9 +141,9 @@ python -m src.run_benchmark --seed seeds/aligned/all.jsonl --agent mock \
 
 | 市场 | cohort |
 |------|--------|
-| CN_A | 大金融 / 消费 / 科技 / 医药 |
-| US | `us_mega`（超大市值龙头）/ `us_tech`（科技龙头） |
-| HK | 港股蓝筹 / 港股科技 |
+| CN_A | 大金融 / 消费 / 科技 / 医药 / 能源 / 制造基建 / 通信 |
+| US | mega / tech / financial / healthcare / consumer / industrial / energy |
+| HK | 蓝筹 / 科技 / 金融 / 消费 / 央企 / 医药 / 公用通信 |
 
 **mega-cap：** 超大市值公司（美股语境常指约 $2000 亿以上巨头）。`us_mega` 跨行业，`us_tech` 偏科技赛道。
 
@@ -148,12 +154,13 @@ python -m src.run_benchmark --seed seeds/aligned/all.jsonl --agent mock \
 | 约定 | 实现 |
 |------|------|
 | 主榜只看 T2 | `official_score` 过滤 `paper_band == T2` |
-| 时间证据 | 同时要求 `official_temporal_eligible == true` |
+| 时间证据 | 同时要求 `official_temporal_eligible == true` 且 `review_status == reviewed` |
 | 任务等权 | 各题型先均值，再跨题型等权 |
 
-当前官方 T2 可用 **288** 条：A1=46、A2-F=66、A2-T=66、A2-H=64、
-B-earnings=46。C 的 128 条 T2 因结果可用日仍是 filing-lag 估计，不进入官方分；
-B-macro 5 条同样因缺少 outcome 证据被排除。
+当前官方 T2 可用 **243** 条：A1=46、A2-F=2、A2-T=66、
+B-earnings=46、B-macro=7、C=76。7 条 macro 均保存官方发布页与 release-adjusted
+反应交易日。C 中 `metadata.source=yahoo` 的 100 条仍被标记为 `non_pit_fundamentals`，
+不进入官方分；C 的 76 条可用样本来自 `c_financial_snapshots.csv` 路径并已匹配官方披露日。
 
 ```bash
 python -m src.run_benchmark \
@@ -171,9 +178,9 @@ python -m src.run_benchmark \
 | D / E | 各 12 条，探针用途；一般不必为规模再扩 |
 | T3 | 有前瞻模板；已结算正式题几乎为空；真 T3 应按「当日生成后 1–2 天内回测」 |
 | 泄漏校准 | draft 样例，非正式大规模标注集 |
-| B | earnings 的 outcome 为观测到的下一交易日；5 条 macro 缺证据，不进官方分 |
-| C | 176 条保留作研究集；availability 为 filing-lag 模型估计，**不进官方分**，待补真实首次披露日 |
-| Yahoo 基本面 | 非真 PIT；季报 +45 天 / 年报 +100 天近似 |
+| B | 7 条 macro 已用 BLS / 国家统计局 / 香港政府统计处官方来源；earnings 61/61 已匹配官方公告 |
+| C | 176/176 已匹配官方首次披露日；其中 100 条数值仍来自 Yahoo 并保留 `non_pit_fundamentals`，不进入官方分 |
+| Yahoo 基本面 | 明确标记 `non_pit_fundamentals`、仅作 research；官方分不再默认接受 |
 
 后续优先：按需扩 aligned cutoff 对数 → B/C 对齐面板 → 已结算 T3 → 泄漏校准。
 
@@ -184,5 +191,5 @@ python -m src.run_benchmark \
 | 位置 | 内容 |
 |------|------|
 | GitHub | 代码、脚本、文档、`configs/`、manifest |
-| Hugging Face | 仅主库 ready 评测数据（849 条）；每行直接携带 paper temporal 字段 |
+| Hugging Face | 仅主库 ready 评测数据（851 条）；每行直接携带 paper temporal 字段 |
 | 本地不进代码仓 | `seeds/`（含 `aligned/`）、`data/`、`hf_dataset/`、`results/` |

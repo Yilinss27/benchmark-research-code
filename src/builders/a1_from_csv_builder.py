@@ -108,6 +108,12 @@ def build_record(
         "180": _parse_optional_float(row.get("price_180d")),
         "365": _parse_optional_float(row.get("price_365d")),
     }
+    primary_window = int(row.get("primary_eval_window_days") or 30)
+    forward_trading_days = {
+        key.removeprefix("forward_trading_day_"): str(value)
+        for key, value in row.items()
+        if key.startswith("forward_trading_day_") and value
+    }
     return {
         "task_id": row["task_id"],
         "category": "A1",
@@ -122,6 +128,7 @@ def build_record(
             "cutoff_price": cutoff_price,
             "market": market,
             "currency": currency,
+            "primary_eval_window_days": primary_window,
         },
         "prompt": _render_prompt(template, row, cutoff_price, currency_unit=currency_unit),
         "expected_output": {
@@ -134,6 +141,8 @@ def build_record(
             "cutoff_price": cutoff_price,
             "actual_prices": actual_prices,
             "eval_windows_days": [30, 90, 180, 365],
+            "primary_eval_window_days": primary_window,
+            "forward_trading_days": forward_trading_days,
         },
         "metadata": {
             "source": source_name,
@@ -141,6 +150,8 @@ def build_record(
             "builder_version": "a1_csv_builder_v2",
             "market": market,
             "currency": currency,
+            "primary_eval_window_days": primary_window,
+            "forward_trading_days": forward_trading_days,
         },
     }
 

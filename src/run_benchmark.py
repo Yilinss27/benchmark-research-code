@@ -590,6 +590,16 @@ def main() -> int:
 
         latency_seconds = time.perf_counter() - started_at
 
+        paper_temporal = record.get("paper_temporal") or {}
+        official_temporal_eligible = record.get("official_temporal_eligible")
+        if official_temporal_eligible is None:
+            official_temporal_eligible = paper_temporal.get(
+                "official_temporal_eligible", False
+            )
+        review_status = record.get("review_status") or paper_temporal.get(
+            "review_status", "draft"
+        )
+
         predictions.append(
             {
                 "task_id": record.get("task_id"),
@@ -598,11 +608,12 @@ def main() -> int:
                 "cutoff_date": record.get("cutoff_date"),
                 "time_band": record.get("time_band"),
                 "paper_band": record.get("paper_band"),
-                "paper_temporal": record.get("paper_temporal"),
-                "official_temporal_eligible": record.get(
-                    "official_temporal_eligible", True
+                "paper_temporal": paper_temporal or None,
+                "official_temporal_eligible": official_temporal_eligible is True,
+                "review_status": review_status,
+                "quality_flags": record.get(
+                    "quality_flags", paper_temporal.get("quality_flags", [])
                 ),
-                "quality_flags": record.get("quality_flags", []),
                 "temporal_split": record.get("metadata", {}).get("temporal_split"),
                 "agent": args.agent,
                 "model": args.model,

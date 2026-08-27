@@ -131,6 +131,19 @@ def build_record(
         "market": market,
         "currency": currency,
     }
+    for key in (
+        "event_url",
+        "event_source",
+        "macro_indicator",
+        "release_timestamp",
+        "release_timezone",
+        "release_phase",
+        "reaction_trading_day",
+        "baseline_trading_day",
+    ):
+        value = row.get(key)
+        if value not in (None, ""):
+            seed[key] = str(value).strip()
 
     return {
         "task_id": row["event_id"].strip(),
@@ -162,6 +175,14 @@ def build_record(
             "builder_version": "b_event_csv_builder_v2",
             "market": market,
             "currency": currency,
+            "event_evidence_url": seed.get("event_url"),
+            "outcome_evidence_url": seed.get("event_url"),
+            "outcome_evidence_code": (
+                f"observed_close:{seed.get('baseline_trading_day')}->{seed.get('reaction_trading_day')}"
+                if seed.get("baseline_trading_day") and seed.get("reaction_trading_day")
+                else None
+            ),
+            "outcome_available_at": seed.get("reaction_trading_day"),
         },
     }
 
