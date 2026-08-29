@@ -1,6 +1,6 @@
-# Benchmark Research 数据现状（v0.8.0）
+# Benchmark Research 数据现状（v0.9.0）
 
-**版本：** v0.8.0（release candidate）
+**版本：** v0.9.0（release candidate）
 **代码仓：** [Yilinss27/benchmark-research-code](https://github.com/Yilinss27/benchmark-research-code)  
 **数据仓：** [sselaine27/benchmark-research](https://huggingface.co/datasets/sselaine27/benchmark-research)  
 **统计日：** 2026-08-27
@@ -9,7 +9,7 @@
 
 ## 1. 概览
 
-当前正式题库 **851** 条 `ready`。另有跨时间对齐实验面板 **aligned_v1**（1,744 条，不覆盖主库）。
+当前正式题库 **1120** 条 `ready`。另有跨时间对齐实验面板 **aligned_v1**（1,744 条，不覆盖主库）。
 
 | 能力 | 现状 |
 |------|------|
@@ -32,15 +32,15 @@
 
 | 题型 | ready | 论文 T1 | 论文 T2 | 说明 |
 |------|------:|--------:|--------:|------|
-| A1 | 228 | 182 | 46 | 估值预测 |
-| A2-F | 98 | **32** | 66 | 基本面排序 |
+| A1 | 244 | 198 | 46 | 估值预测 |
+| A2-F | 112 | 46 | 66 | 基本面排序 |
 | A2-T | 161 | 95 | 66 | 技术面排序 |
-| A2-H | 96 | **32** | 64 | 混合排序 |
-| B | 68 | 15 | 53 | earnings + 7 条官方 macro |
-| C | 176 | 48 | 128 | 财务指标 |
-| D | 12 | — | — | 反事实探针（`paper_band=D`） |
-| E | 12 | — | — | 公式探针（`paper_band=E`） |
-| **合计** | **851** | **404** | **423** | quarantine = 0 |
+| A2-H | 110 | 46 | 64 | 混合排序 |
+| B | 139 | 52 | 86 | earnings + 13 条官方 macro |
+| C | 294 | 0 | 294 | 财务指标（官方+Yahoo 双轨） |
+| D | 30 | — | — | 反事实探针（`paper_band=D`） |
+| E | 30 | — | — | 公式探针（`paper_band=E`） |
+| **合计** | **1120** | **437** | **622** | quarantine = 1 |
 
 `python scripts/validate.py`：通过。
 
@@ -48,12 +48,12 @@
 
 | 题型 | CN_A | US | HK |
 |------|-----:|---:|---:|
-| A1 | 180 | 24 | 24 |
-| A2-F | 50 | 24 | 24 |
+| A1 | 180 | 31 | 33 |
+| A2-F | 50 | 30 | 32 |
 | A2-T | 82 | 40 | 39 |
-| A2-H | 48 | 24 | 24 |
-| B | 41 | 13 | 14 |
-| C | 156 | 10 | 10 |
+| A2-H | 48 | 30 | 32 |
+| B | 43 | 49 | 47 |
+| C | 156 | 66 | 72 |
 
 ---
 
@@ -92,7 +92,7 @@
 | 市场 | CN_A / US / HK |
 | cutoff | 14 组显式 T1↔T2 配对，包含 `2025-12-31` 锚点 |
 | horizon | 30 天 |
-| 产出 | `seeds/aligned/`（**不改主库 851**） |
+| 产出 | `seeds/aligned/`（**不改主库 1120**） |
 | 规模 | **T1=872 / T2=872**，逐 pair 结构对称 |
 
 | 题型 | T1 | T2 |
@@ -157,10 +157,10 @@ python -m src.run_benchmark --seed seeds/aligned/all.jsonl --agent mock \
 | 时间证据 | 同时要求 `official_temporal_eligible == true` 且 `review_status == reviewed` |
 | 任务等权 | 各题型先均值，再跨题型等权 |
 
-当前官方 T2 可用 **243** 条：A1=46、A2-F=2、A2-T=66、
-B-earnings=46、B-macro=7、C=76。7 条 macro 均保存官方发布页与 release-adjusted
-反应交易日。C 中 `metadata.source=yahoo` 的 100 条仍被标记为 `non_pit_fundamentals`，
-不进入官方分；C 的 76 条可用样本来自 `c_financial_snapshots.csv` 路径并已匹配官方披露日。
+当前官方 T2 可用 **136** 条（`official_temporal_eligible=true` 且 `review_status=reviewed`）；
+13 条 macro 均保存官方发布页与 release-adjusted 反应交易日。
+C 目前为双轨：`official_filing_primary` 与 `research_yahoo` 并行，后者保留
+`non_pit_fundamentals` 标记，不进入官方分。
 
 ```bash
 python -m src.run_benchmark \
@@ -175,11 +175,11 @@ python -m src.run_benchmark \
 
 | 项 | 现状 |
 |----|------|
-| D / E | 各 12 条，探针用途；一般不必为规模再扩 |
-| T3 | 有前瞻模板；已结算正式题几乎为空；真 T3 应按「当日生成后 1–2 天内回测」 |
+| D / E | 各 30 条，支持脚本化量产与抽检 |
+| T3 | D 已覆盖 T3 切片；其他主任务仍以 T1/T2 为主 |
 | 泄漏校准 | draft 样例，非正式大规模标注集 |
-| B | 7 条 macro 已用 BLS / 国家统计局 / 香港政府统计处官方来源；earnings 61/61 已匹配官方公告 |
-| C | 176/176 已匹配官方首次披露日；其中 100 条数值仍来自 Yahoo 并保留 `non_pit_fundamentals`，不进入官方分 |
+| B | 13 条 macro 使用 BLS / 国家统计局 / 香港政府统计处官方来源；earnings 主体已补齐官方 URL |
+| C | 294 条 C 题完成双轨标记；官方轨持续通过 filing snapshot 管线补值 |
 | Yahoo 基本面 | 明确标记 `non_pit_fundamentals`、仅作 research；官方分不再默认接受 |
 
 后续优先：按需扩 aligned cutoff 对数 → B/C 对齐面板 → 已结算 T3 → 泄漏校准。
@@ -191,5 +191,5 @@ python -m src.run_benchmark \
 | 位置 | 内容 |
 |------|------|
 | GitHub | 代码、脚本、文档、`configs/`、manifest |
-| Hugging Face | 仅主库 ready 评测数据（851 条）；每行直接携带 paper temporal 字段 |
+| Hugging Face | 仅主库 ready 评测数据（1119 条，剔除 quarantine 后导出）；每行直接携带 paper temporal 字段 |
 | 本地不进代码仓 | `seeds/`（含 `aligned/`）、`data/`、`hf_dataset/`、`results/` |

@@ -137,7 +137,7 @@ t2 = a1["train"].filter(lambda x: x["time_band"] == "T2")
 可用 config：`a1` / `a2_f` / `a2_t` / `a2_h` / `b` / `c` / `d` / `e`  
 默认 config 为 `a1`。
 
-## 规模（v0.8.0）
+## 规模（v0.9.0）
 
 | config | ready 条数 |
 |--------|-----------|
@@ -151,7 +151,7 @@ t2 = a1["train"].filter(lambda x: x["time_band"] == "T2")
 - `guard_days = 30` → T1 outcome ≤ `2024-05-31`，T2 origin ≥ `2024-07-30`
 - `experiment_as_of = 2026-08-17`
 
-**不兼容声明：** 旧 Hub pin（339 题 / `model_training_cutoff=2024-06-01`）为 legacy identity，不得与 v0.8 paper_band / C1 表混比。
+**不兼容声明：** 旧 Hub pin（339 题 / `model_training_cutoff=2024-06-01`）为 legacy identity，不得与 v0.9 paper_band / C1 表混比。
 
 ## 字段说明
 

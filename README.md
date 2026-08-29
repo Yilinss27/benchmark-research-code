@@ -32,18 +32,18 @@ The codebase supports three workflows:
 2. Run LLM / agent baselines on ready records.
 3. Export a data-only Hugging Face package.
 
-The current public dataset contains 851 ready records:
+The current public dataset contains 1120 ready records:
 
 | Task | Description | HF config | Ready |
 |------|-------------|-----------|------:|
-| A1 | Single-stock valuation range prediction | `a1` | 228 |
-| A2-F | Cross-sectional ranking with fundamentals | `a2_f` | 98 |
+| A1 | Single-stock valuation range prediction | `a1` | 244 |
+| A2-F | Cross-sectional ranking with fundamentals | `a2_f` | 112 |
 | A2-T | Cross-sectional ranking with technicals | `a2_t` | 161 |
 | A2-H | Cross-sectional ranking with hybrid signals | `a2_h` | 96 |
-| B | Event-driven direction prediction | `b` | 68 |
-| C | Forward financial metric prediction | `c` | 176 |
-| D | Counterfactual event reasoning | `d` | 12 |
-| E | Multi-step financial formula calculation | `e` | 12 |
+| B | Event-driven direction prediction | `b` | 139 |
+| C | Forward financial metric prediction | `c` | 294 |
+| D | Counterfactual event reasoning | `d` | 30 |
+| E | Multi-step financial formula calculation | `e` | 30 |
 
 Detailed task definitions are in [`docs/task_cards.md`](docs/task_cards.md). The record schema is described in [`docs/schema.md`](docs/schema.md).
 
@@ -122,7 +122,7 @@ Rules:
 - `T2`: `model_training_cutoff < cutoff_date < reference_current_date`
 - `T3`: `cutoff_date >= reference_current_date`
 
-Published Hugging Face distribution (v0.8.0, 851 records):
+Published Hugging Face distribution (v0.9.0, 1119 records after quarantine filter):
 
 | Time Band | Count | Notes |
 |-----------|------:|-------|

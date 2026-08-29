@@ -43,7 +43,7 @@ A2_PREDICTION_WINDOW_DAYS = 30
 A2_LOOKBACK_CALENDAR_DAYS = 150
 A2_MIN_STOCKS = 6
 DEFAULT_TRAINING_CUTOFF = "2024-06-30"
-DEFAULT_CURRENT_DATE = "2026-08-08"
+DEFAULT_CURRENT_DATE = "2026-08-17"
 
 
 def parse_args() -> argparse.Namespace:
@@ -882,6 +882,9 @@ def generate_c(
             record["metadata"]["fundamentals_source"] = fund.__class__.__name__
             record["metadata"]["fundamentals_source_tier"] = str(
                 getattr(fund, "source_tier", "unknown")
+            )
+            record["metadata"]["track"] = (
+                "research_yahoo" if source_name == "yahoo" else "official_filing_primary"
             )
             record["metadata"]["statement_freq"] = pair.get(
                 "statement_freq", "quarterly"

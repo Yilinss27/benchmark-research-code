@@ -166,7 +166,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - Directional Accuracy
 - Brier Score
 
-**当前实现状态**：ready。7 条 macro 来自 BLS、国家统计局和香港政府统计处；
+**当前实现状态**：ready。13 条 macro 来自 BLS、国家统计局和香港政府统计处；
 盘前/盘中发布使用当日收盘，盘后/非交易日发布使用下一交易日收盘。Earnings
 仅在匹配到 SEC/CNINFO/HKEX 官方公告后才能晋升为官方可用。
 
@@ -256,7 +256,7 @@ cutoff 后 30/90/180/365 天真实收盘价；cutoff 日收盘价。需通过行
 - T1-T2 Gap
 - Format Valid Rate
 
-**当前实现状态**：`ready`（`seeds/d_counterfactual.jsonl`，6 条，覆盖 T1/T2/T3）
+**当前实现状态**：`ready`（`seeds/d_counterfactual.jsonl`，30 条，覆盖 CN_A/US/HK 与 T1/T2/T3；可由 `scripts/generate_d_counterfactual.py` 批量生成）
 
 ---
 
@@ -292,4 +292,4 @@ Python 函数精确计算 + 人工核验，存储于 `correct_answer` / `correct
 - Formula Accuracy（LLM judge）
 - Hard Subset Acc
 
-**当前实现状态**：`ready`（`seeds/e_formula.jsonl`，5 条，覆盖四类 topic）
+**当前实现状态**：`ready`（`seeds/e_formula.jsonl`，30 条；可由 `scripts/generate_e_formula.py` 批量生成）

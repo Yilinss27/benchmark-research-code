@@ -25,6 +25,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", default="configs/macro_events_v1.json")
     parser.add_argument("--seed", default="seeds/b_event.jsonl")
+    parser.add_argument(
+        "--min-generated",
+        type=int,
+        default=7,
+        help="Minimum number of verified macro rows required.",
+    )
     return parser.parse_args()
 
 
@@ -54,9 +60,9 @@ def main() -> int:
         )
         for row in generated
     ]
-    if len(generated) != 7:
+    if len(generated) < args.min_generated:
         raise SystemExit(
-            f"Expected 7 verified macro rows, generated {len(generated)}; "
+            f"Expected at least {args.min_generated} verified macro rows, generated {len(generated)}; "
             f"warnings={warnings}"
         )
     retained = [row for row in existing if row.get("variant") != "macro"]

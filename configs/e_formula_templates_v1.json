@@ -1,0 +1,61 @@
+{
+  "version": "e_formula_templates_v1",
+  "templates": [
+    {
+      "formula_id": "gordon_growth",
+      "topic_category": "corporate_finance",
+      "difficulty": "easy",
+      "problem_template": "某项目未来一年自由现金流 FCF={fcf}（百万元），贴现率 WACC={wacc}%，永续增长率 g={g}%。请根据 Gordon Growth Model 计算企业终值，结果以百万元为单位，保留两位小数。",
+      "unit": "CNY million"
+    },
+    {
+      "formula_id": "wacc_blend",
+      "topic_category": "corporate_finance",
+      "difficulty": "medium",
+      "problem_template": "某公司资本结构中权益占比 {we}%，债务占比 {wd}%。权益成本为 {re}%，税前债务成本为 {rd}%，所得税率 {tax}%。请计算 WACC，结果保留四位小数（小数）。",
+      "unit": "ratio"
+    },
+    {
+      "formula_id": "sharpe_ratio",
+      "topic_category": "portfolio",
+      "difficulty": "easy",
+      "problem_template": "某投资组合年化收益率 {ret}%，年化波动率 {vol}%，无风险利率 {rf}%。请计算 Sharpe Ratio，保留两位小数。",
+      "unit": "ratio"
+    },
+    {
+      "formula_id": "capm_expected_return",
+      "topic_category": "portfolio",
+      "difficulty": "medium",
+      "problem_template": "某股票 beta={beta}，无风险利率 {rf}%，市场组合预期收益率 {rm}%。请根据 CAPM 计算该股票预期收益率（%），保留两位小数。",
+      "unit": "%"
+    },
+    {
+      "formula_id": "bond_ytm_simple",
+      "topic_category": "fixed_income",
+      "difficulty": "medium",
+      "problem_template": "某面值 100 的一年期债券，当前价格 {price}，一年后兑付本息 {payoff}。请计算到期收益率（%），保留两位小数。",
+      "unit": "%"
+    },
+    {
+      "formula_id": "duration_approx",
+      "topic_category": "fixed_income",
+      "difficulty": "hard",
+      "problem_template": "某债券修正久期为 {duration}，当前收益率上升 {dy} 个基点。请用久期近似计算价格变动百分比（%），保留两位小数。",
+      "unit": "%"
+    },
+    {
+      "formula_id": "black_scholes_call",
+      "topic_category": "derivatives",
+      "difficulty": "hard",
+      "problem_template": "某欧式看涨期权参数：标的价格 S={s}，行权价 K={k}，无风险利率 r={r}%（连续复利），到期时间 T={t} 年，N(d1)={nd1}，N(d2)={nd2}。请计算看涨期权价格，保留两位小数。",
+      "unit": "price"
+    },
+    {
+      "formula_id": "put_call_parity",
+      "topic_category": "derivatives",
+      "difficulty": "medium",
+      "problem_template": "某欧式期权：标的价格 S={s}，行权价 K={k}，无风险利率 r={r}%（连续复利），到期时间 T={t} 年，看涨期权价格 C={call}。请根据 Put-Call Parity 计算看跌期权价格，保留两位小数。",
+      "unit": "price"
+    }
+  ]
+}

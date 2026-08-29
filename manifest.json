@@ -1,6 +1,6 @@
 {
   "dataset_name": "benchmark-research",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "status": "dataset_release_candidate",
   "license": "cc-by-4.0",
   "hf_repo": "sselaine27/benchmark-research",
@@ -20,16 +20,26 @@
     "E": {"file": "seeds/e_formula.jsonl", "hf_config": "e", "status": "ready"}
   },
   "counts": {
-    "A1_ready": 228,
-    "A2-F_ready": 98,
+    "A1_ready": 244,
+    "A2-F_ready": 112,
     "A2-T_ready": 161,
-    "A2-H_ready": 96,
-    "B_ready": 68,
-    "C_ready": 176,
-    "D_ready": 12,
-    "E_ready": 12,
-    "template_records": 94,
-    "total_ready_records": 851
+    "A2-H_ready": 110,
+    "B_ready": 139,
+    "C_ready": 294,
+    "D_ready": 30,
+    "E_ready": 30,
+    "template_records": 10,
+    "total_ready_records": 1120
+  },
+  "market_breakdown": {
+    "A1": {"CN_A": 180, "US": 31, "HK": 33},
+    "A2-F": {"CN_A": 50, "US": 30, "HK": 32},
+    "A2-T": {"CN_A": 82, "US": 40, "HK": 39},
+    "A2-H": {"CN_A": 48, "US": 30, "HK": 32},
+    "B": {"CN_A": 43, "US": 49, "HK": 47},
+    "C": {"CN_A": 156, "US": 66, "HK": 72},
+    "D": {"CN_A": 10, "US": 10, "HK": 10},
+    "E": {"CN_A": 30}
   },
   "paper_temporal": {
     "index": "data/task_temporal_index.jsonl",
@@ -41,15 +51,15 @@
     "guard_days": 30,
     "experiment_as_of": "2026-08-17",
     "counts": {
-      "T1": 404,
-      "T2": 423,
-      "quarantine": 0,
-      "D": 12,
-      "E": 12
+      "T1": 437,
+      "T2": 622,
+      "quarantine": 1,
+      "D": 30,
+      "E": 30
     },
     "official_temporal_eligible_counts": {
-      "T1": 292,
-      "T2": 243,
+      "T1": 33,
+      "T2": 136,
       "note": "Counts require observed evidence, official_temporal_eligible=true, and review_status=reviewed"
     }
   },
@@ -64,9 +74,9 @@
     "reference_current_date": "2026-08-17",
     "rule": "legacy time_band on cutoff_date only; paper experiments use paper_band from task_temporal_index",
     "counts": {
-      "T1": 420,
-      "T2": 427,
-      "T3": 4
+      "T1": 476,
+      "T2": 614,
+      "T3": 30
     }
   },
   "export": {
@@ -78,5 +88,5 @@
     "file": "calibration/leakage_probe_v1.json",
     "manifest": "calibration/leakage_probe_manifest.json"
   },
-  "notes": "v0.8.0: 7 official-source B macro events replace 5 legacy rows; official scoring now requires reviewed observed evidence. Yahoo fundamentals are research-only/non-PIT. aligned_v1 contains 14 strict cutoff pairs and at least 50 paired observations per market/task."
+  "notes": "v0.9.0: unified universes are externalized in configs/universes_v1.json, US/HK A/B coverage is expanded to >=30 per subtype, C now runs dual-track (official_filing_primary plus research_yahoo), and D/E are expanded to 30 records each with generation scripts."
 }

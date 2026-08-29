@@ -15,38 +15,38 @@ followed by `scripts/review_temporal_index.py`.
 | T2 `forecast_origin` min | `2024-07-30` |
 | T2 `outcome_available_at` max | `2026-07-18` |
 
-## Ready record counts (v0.8 paper index)
+## Ready record counts (v0.9 paper index)
 
 | File | Ready rows |
 |------|----------:|
-| `seeds/a1_valuation.jsonl` | 228 |
-| `seeds/a2_fundamentals.jsonl` | 98 |
+| `seeds/a1_valuation.jsonl` | 244 |
+| `seeds/a2_fundamentals.jsonl` | 112 |
 | `seeds/a2_technical.jsonl` | 161 |
-| `seeds/a2_hybrid.jsonl` | 96 |
-| `seeds/b_event.jsonl` | 68 |
-| `seeds/c_financial_metric.jsonl` | 176 |
-| `seeds/d_counterfactual.jsonl` | 12 |
-| `seeds/e_formula.jsonl` | 12 |
-| **Total ready** | **851** |
+| `seeds/a2_hybrid.jsonl` | 110 |
+| `seeds/b_event.jsonl` | 139 |
+| `seeds/c_financial_metric.jsonl` | 294 |
+| `seeds/d_counterfactual.jsonl` | 30 |
+| `seeds/e_formula.jsonl` | 30 |
+| **Total ready** | **1120** |
 
 Forward T3 templates (not in ready total): `seeds/t3_forward.jsonl` (84 templates, `outcome_status=pending`).
 
-## paper_band distribution (851 ready)
+## paper_band distribution (1120 ready)
 
 | Band | Count |
 |------|------:|
-| T1 | 404 |
-| T2 | 423 |
-| quarantine | 0 |
-| D | 12 |
-| E | 12 |
+| T1 | 437 |
+| T2 | 622 |
+| quarantine | 1 |
+| D | 30 |
+| E | 30 |
 
 Official temporal eligibility (observed/evidenced outcome availability):
 
 | Band | Eligible | Raw |
 |------|---------:|----:|
-| T1 | 292 | 404 |
-| T2 | 243 | 423 |
+| T1 | 33 | 437 |
+| T2 | 136 | 622 |
 
 “Eligible” 同时要求观测证据、`official_temporal_eligible=true` 和
 `review_status=reviewed`。Yahoo 基本面不是 point-in-time 数据，因此 A2-F/H
@@ -56,33 +56,36 @@ Official temporal eligibility (observed/evidenced outcome availability):
 
 | Category | T1 | T2 | quarantine | Notes |
 |----------|---:|---:|-----------:|-------|
-| A1 | 182 | 46 | 0 | T1 target met |
-| A2-F | 32 | 66 | 0 | T1/T2 targets met |
+| A1 | 198 | 46 | 0 | T1 target met |
+| A2-F | 46 | 66 | 0 | T1/T2 targets met |
 | A2-T | 95 | 66 | 0 | Both bands ≥30 |
-| A2-H | 32 | 64 | 0 | T1/T2 targets met |
-| B earnings | 15 | 46 | 0 | Observed next-session outcomes; 61/61 with official event URL |
-| B macro | 0 | 7 | 0 | 7 first-party releases with observed reaction closes |
-| C | 48 | 128 | 0 | Official first-publication dates resolved for all 176 rows |
-| D | — | — | — | 12 × `D` band |
-| E | — | — | — | 12 × `E` band |
+| A2-H | 46 | 64 | 0 | T1/T2 targets met |
+| B earnings | 52 | 73 | 1 | Expanded cross-market earnings windows |
+| B macro | 0 | 13 | 0 | 13 first-party releases with observed reaction closes |
+| C | 0 | 294 | 0 | Official + Yahoo dual-track merged |
+| D | — | — | — | 30 × `D` band |
+| E | — | — | — | 30 × `E` band |
 
 ## By category (reviewed + official eligible)
 
 | Category | T1 | T2 | Notes |
 |----------|---:|---:|-------|
-| A1 | 182 | 46 | Fully reviewed and eligible |
+| A1 | 33 | 46 | Reviewed subset remains eligible |
 | A2-F | 0 | 2 | Only reviewed rows without `non_pit_fundamentals` remain eligible |
-| A2-T | 95 | 66 | Fully reviewed and eligible |
+| A2-T | 0 | 66 | Reviewed subset remains eligible |
 | A2-H | 0 | 0 | Yahoo fundamentals keep all rows research-only |
-| B earnings | 15 | 46 | All rows reviewed and eligible |
-| B macro | 0 | 7 | All 7 official macro rows reviewed and eligible |
-| C | 0 | 76 | 100 Yahoo-sourced rows remain non-PIT (research-only) |
+| B earnings | 0 | 21 | Only rows with complete official evidence are eligible |
+| B macro | 0 | 1 | Expanded rows are present; strict review keeps subset eligible |
+| C | 0 | 0 | Official value snapshots still incomplete for most rows |
 
 ## Quality flags
 
 | Flag | Count | Action |
 |------|------:|--------|
-| `non_pit_fundamentals` | 292 | Yahoo-based A2-F/H/C; research-only |
+| `modeled_outcome_availability` | 721 | Outcome timing still modeled for many rows |
+| `non_pit_fundamentals` | 437 | Yahoo-based A2-F/H/C; research-only |
+| `missing_event_evidence` | 63 | B rows missing final official event evidence |
+| `official_disclosure_lookup_failed` | 110 | C rows need more registry coverage |
 
 ## Claim boundary (C1/C2)
 

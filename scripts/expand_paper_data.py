@@ -75,7 +75,7 @@ def parse_args() -> argparse.Namespace:
 def _assign(path: Path, records: list[dict[str, Any]]) -> None:
     """Rewrite a seed file with temporal bands assigned."""
     assigned = [
-        update_temporal_band(record, "2024-06-30", "2026-08-08")
+        update_temporal_band(record, "2024-06-30", "2026-08-17")
         for record in records
     ]
     path.parent.mkdir(parents=True, exist_ok=True)

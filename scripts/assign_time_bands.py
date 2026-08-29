@@ -38,7 +38,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--current-date",
-        default="2026-08-08",
+        default="2026-08-17",
         help="Reference current date. training_cutoff < cutoff_date < current_date is T2; current_date and later is T3.",
     )
     parser.add_argument(

@@ -1,0 +1,45 @@
+{
+  "version": "d_event_archetypes_v1",
+  "archetypes": [
+    {
+      "archetype_id": "large_contract",
+      "direction": "positive",
+      "template": "公司公告称与核心客户签订为期{duration}的长期供应协议，合同总金额约{amount}，预计显著增厚未来营收。"
+    },
+    {
+      "archetype_id": "product_approval",
+      "direction": "positive",
+      "template": "公司核心产品获得{regulator}批准上市，管理层预计将提升市场份额与盈利能力。"
+    },
+    {
+      "archetype_id": "buyback_announced",
+      "direction": "positive",
+      "template": "公司董事会通过股份回购计划，拟在未来12个月回购不超过{amount}股份，释放管理层对估值的积极信号。"
+    },
+    {
+      "archetype_id": "regulatory_probe",
+      "direction": "negative",
+      "template": "公司收到{regulator}立案调查通知，涉及财务披露合规问题，可能引发处罚与声誉受损。"
+    },
+    {
+      "archetype_id": "product_safety",
+      "direction": "negative",
+      "template": "媒体报道称公司主力产品在第三方测试中出现安全风险，主要客户暂停采购并启动风险评估。"
+    },
+    {
+      "archetype_id": "guidance_cut",
+      "direction": "negative",
+      "template": "公司下调全年业绩指引，预计营收与利润较此前目标下降约{pct}，市场担忧增长动能转弱。"
+    },
+    {
+      "archetype_id": "debt_risk",
+      "direction": "negative",
+      "template": "公司披露未来一年大额债务即将到期，再融资存在不确定性，可能导致财务压力上升。"
+    },
+    {
+      "archetype_id": "mgmt_change_positive",
+      "direction": "positive",
+      "template": "公司宣布聘任具备行业龙头背景的新任CEO，并发布提效与利润改善计划。"
+    }
+  ]
+}

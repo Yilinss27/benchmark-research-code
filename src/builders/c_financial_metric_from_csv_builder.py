@@ -176,6 +176,7 @@ def build_record(
             "source": source_name,
             "is_template": status == "template",
             "builder_version": "c_financial_metric_csv_builder_v2",
+            "track": "official_filing_primary",
             "market": market,
             "currency": currency,
         },
