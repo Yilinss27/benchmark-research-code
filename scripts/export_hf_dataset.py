@@ -242,6 +242,13 @@ def main() -> int:
         rows = load_jsonl(root / rel)
         # Only export ready records
         rows = [r for r in rows if r.get("status") == "ready"]
+        dropped = [r["task_id"] for r in rows if r["task_id"] not in temporal_index]
+        if dropped:
+            print(
+                f"  {config_name}: dropped {len(dropped)} rows missing temporal index "
+                f"(e.g. {dropped[0]})"
+            )
+        rows = [r for r in rows if r["task_id"] in temporal_index]
         rows = attach_paper_temporal_fields(rows, temporal_index)
         rows = [r for r in rows if r.get("paper_band") != "quarantine"]
         write_jsonl(out / "data" / config_name / "train.jsonl", rows)

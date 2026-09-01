@@ -1,0 +1,8 @@
+{
+  "package": "temporal_provenance_v1",
+  "table_file": "calibration/temporal_provenance_table.csv",
+  "table_sha256": "4cc1a6575d4eb32a3cce29ad57918cd3017e4f05d5231d432c19a8131785d922",
+  "record_count": 921,
+  "review_status": "draft",
+  "notes": "Independent calibration table for temporal provenance audit."
+}
