@@ -75,13 +75,24 @@ def enrich_c_outcome(
     if future_period and disclosure_provider is not None:
         try:
             disclosure = disclosure_provider.find_disclosure(
-                code, market, future_period, form_types=("10-Q", "10-K", "annual", "interim", "quarterly")
+                code,
+                market,
+                future_period,
+                form_types=(
+                    "10-Q",
+                    "10-K",
+                    "8-K",
+                    "annual",
+                    "interim",
+                    "quarterly",
+                    "earnings_release",
+                ),
             )
         except Exception:
             disclosure = None
         if disclosure is not None:
             return {
-                "outcome_available_at": disclosure.published_at[:10],
+                "outcome_available_at": disclosure.published_at,
                 "outcome_available_at_source": f"observed_{disclosure.source}_first_publication",
                 "outcome_evidence_code": disclosure.document_id or "official_filing",
                 "outcome_evidence_url": disclosure.source_url,

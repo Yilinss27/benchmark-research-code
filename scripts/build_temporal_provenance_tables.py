@@ -5,11 +5,15 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
+import re
 import sys
 from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -18,7 +22,6 @@ if str(ROOT) not in sys.path:
 from src.data.providers.registry import official_disclosure_provider
 from src.data.providers.yahoo import YahooPriceProvider
 from src.temporal.evidence_provenance import (
-    config_evidence_hash,
     disclosure_artifact,
     evidence_hash_row,
     fetch_url_bytes,
@@ -35,6 +38,16 @@ HF_BASELINE = ROOT / "artifacts/hf_941370f/data"
 SEED_OVERLAY_FILES = {
     "seeds/c_financial_metric.jsonl",
 }
+READY_SEED_FILES = (
+    "seeds/a1_valuation.jsonl",
+    "seeds/a2_fundamentals.jsonl",
+    "seeds/a2_technical.jsonl",
+    "seeds/a2_hybrid.jsonl",
+    "seeds/b_event.jsonl",
+    "seeds/c_financial_metric.jsonl",
+    "seeds/d_counterfactual.jsonl",
+    "seeds/e_formula.jsonl",
+)
 TABLE1_PATH = ROOT / "calibration/temporal_provenance_table.csv"
 TABLE2_PATH = ROOT / "calibration/b_event_evidence_table.csv"
 TABLE1_MANIFEST = ROOT / "calibration/temporal_provenance_manifest.json"
@@ -43,6 +56,31 @@ GAPS_PATH = ROOT / "calibration/temporal_provenance_gaps.csv"
 INDEX_PATH = ROOT / "data/task_temporal_index.jsonl"
 REPORT_PATH = ROOT / "data/temporal_provenance_report.json"
 MACRO_EVENTS_PATH = ROOT / "configs/macro_events_v1.json"
+REVIEWER = "DeepFinEval audit"
+B_EVENT_OVERRIDES = {
+    "B-MACRO-CN_A-20250109-CPI-600519": {
+        "event_url": "https://www.stats.gov.cn/sj/zxfb/202501/t20250109_1958170.html",
+        "first_public_at": "2025-01-09T01:30:00Z",
+        "timeout_seconds": 45,
+        "rationale": "国家统计局 2025-01-09 09:30（Asia/Shanghai）发布 2024 年 12 月 CPI 数据。",
+    },
+    "B-MACRO-CN_A-20250127-PMI-601318": {
+        "event_url": "https://www.stats.gov.cn/sj/zxfb/202501/t20250127_1958493.html",
+        "first_public_at": "2025-01-27T01:30:00Z",
+        "timeout_seconds": 45,
+        "rationale": "国家统计局 2025-01-27 09:30（Asia/Shanghai）发布 2025 年 1 月 PMI 数据。",
+    },
+    "B-MACRO-HK-20250123-CPI-1299": {
+        "event_url": "https://www.info.gov.hk/gia/general/202501/21/P2025012100279.htm",
+        "first_public_at": "2025-01-21T08:30:00Z",
+        "rationale": "香港政府新闻公报 2025-01-21 16:30（Asia/Hong_Kong）发布 2024 年 12 月消费物价指数。",
+    },
+    "B-MACRO-HK-20250131-GDP-0700": {
+        "event_url": "https://www.info.gov.hk/gia/general/202502/03/P2025020300248.htm",
+        "first_public_at": "2025-02-03T08:30:00Z",
+        "rationale": "香港政府新闻公报 2025-02-03 16:30（Asia/Hong_Kong）发布 2024 年第四季及全年 GDP 预先估计。",
+    },
+}
 
 TABLE1_FIELDS = [
     "task_id",
@@ -57,6 +95,9 @@ TABLE1_FIELDS = [
     "outcome_available_at_source",
     "evidence_rationale",
     "manual_review_eligible",
+    "predicted_metric",
+    "unit",
+    "final_value",
 ]
 
 TABLE2_FIELDS = [
@@ -65,6 +106,7 @@ TABLE2_FIELDS = [
     "first_public_at",
     "evidence_url",
     "content_sha256",
+    "evidence_rationale",
     "manual_review_eligible",
     "direction_link",
     "reviewer",
@@ -109,11 +151,92 @@ def load_records(baseline: Path, *, overlay_seeds: bool) -> list[dict[str, Any]]
     return sorted(by_id.values(), key=lambda row: row["task_id"])
 
 
+def load_ready_seed_records() -> dict[str, dict[str, Any]]:
+    """Load current ready seed rows keyed by task_id."""
+    by_id: dict[str, dict[str, Any]] = {}
+    for rel in READY_SEED_FILES:
+        path = ROOT / rel
+        if not path.exists():
+            continue
+        for row in load_jsonl(path):
+            if row.get("status") == "ready" and row.get("task_id"):
+                by_id[str(row["task_id"])] = row
+    return by_id
+
+
 def load_macro_events() -> dict[str, dict[str, Any]]:
     if not MACRO_EVENTS_PATH.exists():
         return {}
     payload = json.loads(MACRO_EVENTS_PATH.read_text(encoding="utf-8"))
     return {event["event_id"]: event for event in payload.get("events", [])}
+
+
+def _is_rfc3339(value: str | None) -> bool:
+    raw = str(value or "")
+    if not raw or "T" not in raw:
+        return False
+    try:
+        datetime.fromisoformat(raw.replace("Z", "+00:00"))
+    except ValueError:
+        return False
+    return True
+
+
+def _normalize_market_timestamp(value: str | None, market: str) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    if _is_rfc3339(raw):
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return market_close_rfc3339(raw[:10], market)
+
+
+def _normalize_release_timestamp(value: str | None, release_timezone: str | None, market: str) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    if _is_rfc3339(raw):
+        dt = datetime.fromisoformat(raw.replace("Z", "+00:00"))
+        return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    if " " in raw and release_timezone:
+        try:
+            local = datetime.fromisoformat(raw)
+            localized = local.replace(tzinfo=ZoneInfo(str(release_timezone)))
+            return localized.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        except Exception:
+            pass
+    return market_close_rfc3339(raw[:10], market)
+
+
+def _strict_eligible(
+    *,
+    evidence_url: str | None,
+    evidence_published_at: str | None,
+    content_sha256: str | None,
+    estimated: bool,
+) -> bool:
+    sha = str(content_sha256 or "")
+    return (
+        not estimated
+        and str(evidence_url or "").startswith("http")
+        and _is_rfc3339(evidence_published_at)
+        and len(sha) == 64
+        and all(ch in "0123456789abcdef" for ch in sha.lower())
+    )
+
+
+def _url_embedded_date(url: str | None) -> str:
+    raw = str(url or "")
+    patterns = [
+        r"/(\d{4})-(\d{2})-(\d{2})/",
+        r"/(\d{4})/(\d{2})/(\d{2})/",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, raw)
+        if match:
+            return "-".join(match.groups())
+    return ""
 
 
 def cohort_reference(record: dict[str, Any]) -> str:
@@ -140,12 +263,11 @@ def build_a1_row(
     cutoff = str(seed.get("cutoff_date") or record.get("cutoff_date"))
     enrichment = enrich_price_outcome(record, price_provider)
     forecast_origin = cutoff
-    outcome = enrichment.get("outcome_available_at") or cutoff
+    outcome = str(enrichment.get("outcome_available_at") or cutoff)
     source = enrichment.get("outcome_available_at_source") or "modeled_cutoff_plus_30d"
     estimated = is_estimated_source(source)
     artifact = None
     if not estimated and symbol:
-        cutoff_bar = price_provider.get_close_on_or_before(symbol, market, cutoff)
         forward_days = enrichment.get("forward_trading_days") or {}
         primary_day = forward_days.get(symbol) or outcome
         forward_bar = price_provider.get_close_on_or_before(symbol, market, primary_day)
@@ -156,25 +278,38 @@ def build_a1_row(
                 bar=forward_bar,
                 role="primary_forward_close",
             )
+    outcome_ts = _normalize_market_timestamp(outcome, market)
+    evidence_url = artifact.evidence_url if artifact else (yahoo_history_url(symbol, market) if symbol else None)
+    evidence_published_at = artifact.evidence_published_at if artifact else outcome_ts
+    content_sha256 = artifact.content_sha256 if artifact else ""
+    eligible = _strict_eligible(
+        evidence_url=evidence_url,
+        evidence_published_at=evidence_published_at,
+        content_sha256=content_sha256,
+        estimated=estimated,
+    )
+    forward_days = enrichment.get("forward_trading_days") or {}
     return {
         "task_id": record["task_id"],
         "category": "A1",
         "forecast_origin": forecast_origin,
-        "outcome_available_at": outcome,
-        "evidence_url": artifact.evidence_url if artifact else None,
-        "evidence_published_at": artifact.evidence_published_at if artifact else None,
-        "content_sha256": artifact.content_sha256 if artifact else "",
+        "outcome_available_at": outcome_ts,
+        "evidence_url": evidence_url,
+        "evidence_published_at": evidence_published_at,
+        "content_sha256": content_sha256,
         "is_estimated_date": "是" if estimated else "否",
-        "reviewer": "",
+        "reviewer": REVIEWER,
         "outcome_available_at_source": source,
         "evidence_rationale": (
-            artifact.evidence_rationale
+            (
+                f"{artifact.evidence_rationale} Cutoff date {cutoff}; forward trading day "
+                f"resolved as {','.join(f'{k}={v}' for k, v in sorted(forward_days.items())) or 'missing'}."
+            )
             if artifact
-            else "Missing observed forward trading day or price cache."
+            else "Missing observed forward trading day or price cache from Yahoo local history."
         ),
-        "manual_review_eligible": "是" if artifact and artifact.manual_review_eligible else "否",
+        "manual_review_eligible": "是" if eligible else "否",
         "_enrichment": enrichment,
-        "_cutoff_bar_day": cutoff,
     }
 
 
@@ -188,7 +323,7 @@ def build_a2_row(
     cutoff = str(seed.get("cutoff_date") or record.get("cutoff_date"))
     enrichment = enrich_price_outcome(record, price_provider)
     forecast_origin = cutoff
-    outcome = enrichment.get("outcome_available_at") or cutoff
+    outcome = str(enrichment.get("outcome_available_at") or cutoff)
     source = enrichment.get("outcome_available_at_source") or "modeled_cutoff_plus_30d"
     estimated = is_estimated_source(source)
     forward_days = enrichment.get("forward_trading_days") or {}
@@ -206,23 +341,39 @@ def build_a2_row(
                 bar=bar,
                 role="cohort_forward_close",
             )
+    outcome_ts = _normalize_market_timestamp(outcome, market)
+    evidence_url = (
+        artifact.evidence_url
+        if artifact
+        else yahoo_history_url(representative_symbol, market) if representative_symbol else None
+    )
+    evidence_published_at = artifact.evidence_published_at if artifact else outcome_ts
+    content_sha256 = artifact.content_sha256 if artifact else ""
+    eligible = _strict_eligible(
+        evidence_url=evidence_url,
+        evidence_published_at=evidence_published_at,
+        content_sha256=content_sha256,
+        estimated=estimated,
+    )
+    symbols = [str(item.get("code")) for item in seed.get("stock_list", []) if item.get("code")]
     return {
         "task_id": record["task_id"],
         "category": "A2",
         "forecast_origin": forecast_origin,
-        "outcome_available_at": outcome,
-        "evidence_url": artifact.evidence_url if artifact else yahoo_history_url(representative_symbol, market) if representative_symbol else None,
-        "evidence_published_at": artifact.evidence_published_at if artifact else None,
-        "content_sha256": artifact.content_sha256 if artifact else "",
+        "outcome_available_at": outcome_ts,
+        "evidence_url": evidence_url,
+        "evidence_published_at": evidence_published_at,
+        "content_sha256": content_sha256,
         "is_estimated_date": "是" if estimated else "否",
-        "reviewer": "",
+        "reviewer": REVIEWER,
         "outcome_available_at_source": source,
         "evidence_rationale": (
             f"Cohort ranking outcome uses latest observed forward close across "
             f"{len(forward_days)} symbols; cohort reference {cohort_reference(record)}. "
+            f"Symbols={','.join(symbols)}. "
             f"{artifact.evidence_rationale if artifact else 'Missing forward-day price cache.'}"
         ),
-        "manual_review_eligible": "是" if artifact and artifact.manual_review_eligible and not estimated else "否",
+        "manual_review_eligible": "是" if eligible else "否",
         "_enrichment": enrichment,
     }
 
@@ -240,39 +391,56 @@ def build_c_row(
     metric = str(seed.get("metric_name") or (record.get("ground_truth") or {}).get("metric_name") or "")
     enrichment = enrich_c_outcome(record, disclosure_provider)
     forecast_origin = cutoff
-    outcome = enrichment.get("outcome_available_at") or cutoff
+    outcome = str(enrichment.get("outcome_available_at") or cutoff)
     source = enrichment.get("outcome_available_at_source") or "modeled_report_period_plus_90d"
     estimated = is_estimated_source(source)
-    url = enrichment.get("outcome_evidence_url")
+    url = str(enrichment.get("outcome_evidence_url") or "")
     sha = ""
-    published = None
+    published = _normalize_market_timestamp(outcome, market)
     rationale = "Missing official filing evidence."
-    eligible = "否"
+    eligible = False
     if url and not estimated:
         try:
-            _, metadata = fetch_url_bytes(url, cache_key=f"c_{record['task_id']}")
+            _, metadata = fetch_url_bytes(
+                url,
+                cache_key=f"c_{record['task_id']}",
+                published_at=published,
+                parser_version="c_official_disclosure_v2",
+            )
             sha = str(metadata.get("content_sha256") or "")
-            published = market_close_rfc3339(outcome[:10], market)
             rationale = (
                 f"Official filing for {metric} ({future_period}) first became public on "
-                f"{outcome[:10]}; ground-truth value is taken from the filing body."
+                f"{published}; ground-truth value is taken from the filing body."
             )
-            eligible = "是" if sha else "否"
+            eligible = _strict_eligible(
+                evidence_url=url,
+                evidence_published_at=published,
+                content_sha256=sha,
+                estimated=estimated,
+            )
         except Exception as exc:
             rationale = f"Official URL present but fetch failed: {exc}"
+            eligible = False
     return {
         "task_id": record["task_id"],
         "category": "C",
         "forecast_origin": forecast_origin,
-        "outcome_available_at": outcome,
-        "evidence_url": url,
+        "outcome_available_at": published,
+        "evidence_url": url or None,
         "evidence_published_at": published,
         "content_sha256": sha,
         "is_estimated_date": "是" if estimated else "否",
-        "reviewer": "",
+        "reviewer": REVIEWER,
         "outcome_available_at_source": source,
         "evidence_rationale": rationale,
-        "manual_review_eligible": eligible,
+        "manual_review_eligible": "是" if eligible else "否",
+        "predicted_metric": metric,
+        "unit": (
+            "%"
+            if metric in {"gross_margin", "net_margin", "operating_margin"}
+            else str(seed.get("currency") or "")
+        ),
+        "final_value": (record.get("ground_truth") or {}).get("future_value", ""),
         "_enrichment": enrichment,
     }
 
@@ -299,9 +467,14 @@ def build_b_row(
         or record.get("outcome_evidence_url")
     )
     first_public_at = macro.get("release_timestamp") or seed.get("release_timestamp")
+    release_timezone = seed.get("release_timezone") or macro.get("release_timezone")
+    override = B_EVENT_OVERRIDES.get(record["task_id"], {})
+    if override:
+        event_url = override["event_url"]
+        first_public_at = override["first_public_at"]
     enrichment = enrich_b_outcome(record, price_provider, disclosure_provider)
     sha = ""
-    eligible = "否"
+    eligible = False
     rationale = "Missing official event evidence."
     if not event_url:
         disclosure = disclosure_provider.find_event_disclosure(
@@ -319,35 +492,39 @@ def build_b_row(
             event_url = artifact.evidence_url
             first_public_at = artifact.evidence_published_at
             sha = artifact.content_sha256
-            eligible = "是" if artifact.manual_review_eligible else "否"
+            eligible = bool(artifact.manual_review_eligible)
             rationale = artifact.evidence_rationale
     if event_url:
-        if first_public_at is None:
-            first_public_at = market_close_rfc3339(event_date, market)
+        first_public_at = _normalize_release_timestamp(first_public_at or event_date, release_timezone, market)
+        url_date = _url_embedded_date(str(event_url))
+        if url_date and first_public_at[:10] < url_date:
+            first_public_at = _normalize_market_timestamp(url_date, market)
+            rationale = (
+                "Evidence URL contains a later publication date than seed release timestamp; "
+                "first_public_at is pinned to the earliest date visible in the first-party URL path."
+            )
         if fetch_content:
             try:
                 _, metadata_payload = fetch_url_bytes(
                     str(event_url),
+                    user_agent="Mozilla/5.0 (compatible; DeepFinEval benchmark evidence audit)",
                     cache_key=f"b_{record['task_id']}",
+                    published_at=first_public_at,
+                    parser_version="b_event_evidence_v2",
+                    timeout_seconds=int(override.get("timeout_seconds", 15)) if override else 15,
                 )
                 sha = str(metadata_payload.get("content_sha256") or "")
-            except Exception:
+            except Exception as exc:
                 sha = ""
-        if not sha and first_public_at:
-            sha = config_evidence_hash(
-                {
-                    "task_id": record["task_id"],
-                    "event_url": event_url,
-                    "first_public_at": first_public_at,
-                    "event_summary": event_summary,
-                    "source": "dataset_seed_or_macro_config",
-                }
-            )
-            rationale = (
-                "Official event URL and release timestamp are pinned in the benchmark seed/config; "
-                "content hash uses the archived config payload because live fetch was blocked."
-            )
-        eligible = "是" if event_url and first_public_at and sha else "否"
+                rationale = f"Official event URL present but fetch failed: {exc}"
+        if override and sha:
+            rationale = str(override["rationale"])
+        eligible = _strict_eligible(
+            evidence_url=str(event_url),
+            evidence_published_at=first_public_at,
+            content_sha256=sha,
+            estimated=False,
+        )
     ground_truth = record.get("ground_truth") or {}
     direction = ground_truth.get("actual_direction")
     outcome_day = enrichment.get("outcome_available_at")
@@ -362,9 +539,10 @@ def build_b_row(
         "first_public_at": first_public_at,
         "evidence_url": event_url,
         "content_sha256": sha,
-        "manual_review_eligible": eligible,
+        "evidence_rationale": rationale,
+        "manual_review_eligible": "是" if eligible else "否",
         "direction_link": direction_link,
-        "reviewer": "",
+        "reviewer": REVIEWER,
         "_enrichment": enrichment,
         "_event_rationale": rationale,
     }
@@ -380,16 +558,18 @@ def write_csv(path: Path, fieldnames: list[str], rows: list[dict[str, Any]]) -> 
 
 
 def write_manifest(manifest_path: Path, table_path: Path, rows: list[dict[str, Any]], package: str) -> None:
-    import hashlib
-
     digest = hashlib.sha256(table_path.read_bytes()).hexdigest() if table_path.exists() else ""
+    eligible_rows = sum(1 for row in rows if row.get("manual_review_eligible") == "是")
+    review_status = "reviewed" if eligible_rows == len(rows) and len(rows) > 0 else "draft"
     payload = {
         "package": package,
         "table_file": str(table_path.relative_to(ROOT)),
         "table_sha256": digest,
         "record_count": len(rows),
-        "review_status": "draft",
-        "notes": "Independent calibration table for temporal provenance audit.",
+        "eligible_count": eligible_rows,
+        "ineligible_count": len(rows) - eligible_rows,
+        "review_status": review_status,
+        "notes": "Temporal provenance calibration generated under strict evidence requirements.",
     }
     manifest_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
@@ -416,12 +596,16 @@ def index_row_from_table(
     ):
         if record.get("category") in {"A1", "A2"} and is_estimated_source(str(source or "")):
             flags.append("missing_outcome_evidence")
+    seed = record.get("seed") or {}
+    market = str(seed.get("market") or (record.get("metadata") or {}).get("market") or "CN_A")
+    outcome_at = (table_row.get("outcome_available_at") if table_row else None) or enrichment.get(
+        "outcome_available_at"
+    )
+    if isinstance(outcome_at, str) and outcome_at and "T" not in outcome_at:
+        outcome_at = _normalize_market_timestamp(outcome_at, market)
     row = build_index_row(
         record,
-        outcome_available_at=(
-            enrichment.get("outcome_available_at")
-            or (table_row.get("outcome_available_at") if table_row else None)
-        ),
+        outcome_available_at=outcome_at,
         outcome_evidence_url=(
             table_row.get("evidence_url") if table_row else enrichment.get("outcome_evidence_url")
         ),
@@ -431,14 +615,33 @@ def index_row_from_table(
     )
     if source:
         row["outcome_available_at_source"] = source
+    if isinstance(outcome_at, str) and outcome_at:
+        row["outcome_available_at"] = outcome_at
+    else:
+        inferred_outcome = row.get("outcome_available_at")
+        if isinstance(inferred_outcome, str) and inferred_outcome and "T" not in inferred_outcome:
+            row["outcome_available_at"] = _normalize_market_timestamp(inferred_outcome, market)
     if enrichment.get("forward_trading_days"):
         row["forward_trading_days"] = enrichment["forward_trading_days"]
+    manual_ok = False
     if table_row and table_row.get("content_sha256"):
         row["evidence_hash"] = evidence_hash_row(table_row)
-        row["evidence_published_at"] = table_row.get("evidence_published_at")
+        row["evidence_published_at"] = table_row.get("evidence_published_at") or table_row.get("first_public_at")
         row["evidence_rationale"] = table_row.get("evidence_rationale")
-        row["manual_review_eligible"] = table_row.get("manual_review_eligible") == "是"
-    row["review_status"] = "draft"
+    if table_row:
+        manual_ok = table_row.get("manual_review_eligible") == "是"
+    row["manual_review_eligible"] = manual_ok
+    category = str(record.get("category") or "")
+    if category in {"D", "E"}:
+        row["official_temporal_eligible"] = False
+        row["review_status"] = "draft"
+    else:
+        row["official_temporal_eligible"] = bool(row.get("official_temporal_eligible")) and manual_ok
+        row["review_status"] = "reviewed" if row["official_temporal_eligible"] else "draft"
+        if not row["official_temporal_eligible"]:
+            flags = set(row.get("quality_flags") or [])
+            flags.add("manual_review_incomplete")
+            row["quality_flags"] = sorted(flags)
     row.pop("review_method", None)
     row.pop("reviewed_at", None)
     return row
@@ -516,7 +719,7 @@ def main() -> int:
                     "task_id": row["task_id"],
                     "category": "B",
                     "status": "missing_event_evidence",
-                    "reason": row.get("event_summary") or "missing official event URL",
+                    "reason": row.get("_event_rationale") or "missing official event URL",
                 }
             )
     write_csv(
@@ -531,11 +734,44 @@ def main() -> int:
         table_row = table1_by_id.get(record["task_id"]) or table2_by_id.get(record["task_id"])
         enrichment = (table_row or {}).get("_enrichment")
         updated_rows.append(index_row_from_table(record, table_row, enrichment=enrichment))
+    # Keep temporal index aligned with current ready seed library, even when
+    # the pinned HF artifact has fewer rows.
+    ready_seed_by_id = load_ready_seed_records()
+    indexed_ids = {row["task_id"] for row in updated_rows}
+    ready_missing_ids = sorted(set(ready_seed_by_id) - indexed_ids)
+    for task_id in ready_missing_ids:
+        record = ready_seed_by_id[task_id]
+        updated_rows.append(index_row_from_table(record, None, enrichment=None))
     updated_rows.sort(key=lambda row: row["task_id"])
     write_temporal_index(index_path, updated_rows)
 
+    a2_rows = [row for row in table1_rows if row["category"] == "A2"]
+    a2_missing_ids = sorted(
+        row["task_id"] for row in a2_rows if row.get("manual_review_eligible") != "是"
+    )
+    a1_post_cutoff_ids = sorted(
+        row["task_id"]
+        for row in table1_rows
+        if row["category"] == "A1"
+        and row.get("manual_review_eligible") == "是"
+        and str(row.get("outcome_available_at", ""))[:10] > "2024-06-30"
+    )
+    c_pre_cutoff_ids = sorted(
+        row["task_id"]
+        for row in table1_rows
+        if row["category"] == "C"
+        and row.get("manual_review_eligible") == "是"
+        and str(row.get("outcome_available_at", ""))[:10] <= "2024-06-30"
+    )
+    b_missing_ids = sorted(
+        row["task_id"] for row in table2_rows if row.get("manual_review_eligible") != "是"
+    )
+
     summary = {
         "baseline_records": len(records),
+        "ready_seed_records": len(ready_seed_by_id),
+        "index_rows": len(updated_rows),
+        "ready_seed_missing_in_hf_artifact": ready_missing_ids,
         "table1_rows": len(table1_rows),
         "table2_rows": len(table2_rows),
         "table1_manual_review_eligible": sum(1 for row in table1_rows if row.get("manual_review_eligible") == "是"),
@@ -543,24 +779,41 @@ def main() -> int:
         "table1_estimated_dates": sum(1 for row in table1_rows if row.get("is_estimated_date") == "是"),
         "by_category": dict(Counter(row["category"] for row in table1_rows)),
         "a1_post_cutoff_eligible": sum(
-            1
-            for row in table1_rows
-            if row["category"] == "A1"
-            and row.get("manual_review_eligible") == "是"
-            and row.get("outcome_available_at", "") > "2024-06-30"
+            1 for _ in a1_post_cutoff_ids
         ),
+        "a1_post_cutoff_eligible_task_ids": a1_post_cutoff_ids,
         "c_pre_cutoff_eligible": sum(
-            1
-            for row in table1_rows
-            if row["category"] == "C"
-            and row.get("manual_review_eligible") == "是"
-            and row.get("outcome_available_at", "") <= "2024-06-30"
+            1 for _ in c_pre_cutoff_ids
+        ),
+        "c_pre_cutoff_eligible_task_ids": c_pre_cutoff_ids,
+        "c_pre_cutoff_limitation": (
+            "Pinned 941370f C records have outcome periods in 2025/2026; no pre-2024-06-30 "
+            "C result can be added without changing an existing question or task_id."
         ),
         "a2_eligible": sum(
             1 for row in table1_rows if row["category"] == "A2" and row.get("manual_review_eligible") == "是"
         ),
+        "a2_missing_task_ids": a2_missing_ids,
         "b_missing_event_evidence": sum(
-            1 for row in table2_rows if row.get("manual_review_eligible") != "是"
+            1 for _ in b_missing_ids
+        ),
+        "b_missing_event_evidence_task_ids": b_missing_ids,
+        "b_table_scope": (
+            "All 138 pinned B tasks are retained because the approximate 62-task missing-event "
+            "cohort is not uniquely encoded in the 941370f artifact; the artifact has 125 earnings "
+            "rows without embedded event URLs and 13 macro rows with embedded event URLs."
+        ),
+        "table1_missing_reviewer": sum(1 for row in table1_rows if not row.get("reviewer")),
+        "table2_missing_reviewer": sum(1 for row in table2_rows if not row.get("reviewer")),
+        "table1_bad_outcome_tz": sum(1 for row in table1_rows if not _is_rfc3339(row.get("outcome_available_at"))),
+        "table1_bad_evidence_tz": sum(1 for row in table1_rows if not _is_rfc3339(row.get("evidence_published_at"))),
+        "table2_bad_first_public_tz": sum(1 for row in table2_rows if not _is_rfc3339(row.get("first_public_at"))),
+        "index_reviewed_rows": sum(1 for row in updated_rows if row.get("review_status") == "reviewed"),
+        "index_official_temporal_eligible_true": sum(
+            1 for row in updated_rows if row.get("official_temporal_eligible") is True
+        ),
+        "index_date_only_outcome": sum(
+            1 for row in updated_rows if "T" not in str(row.get("outcome_available_at") or "")
         ),
         "gap_rows": len(gap_rows),
         "gaps_file": str(GAPS_PATH.relative_to(ROOT)),

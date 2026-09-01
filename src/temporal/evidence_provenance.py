@@ -7,15 +7,16 @@ import json
 import os
 import ssl
 from dataclasses import dataclass
-from datetime import datetime, time, timezone
+from datetime import datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 from zoneinfo import ZoneInfo
 
 from src.data.providers.base import OfficialDisclosure, PriceBar
 from src.data.providers.yahoo import to_yahoo_ticker
-from src.data.provenance import sha256_text, write_provenance
+from src.data.provenance import sha256_text
 
 DEFAULT_CACHE_DIR = Path("data/cache/official/evidence")
 DEFAULT_SEC_USER_AGENT = "DeepFinEval-benchmark-research/0.9 (academic research; contact: sselaine27@users.noreply.huggingface.co)"
@@ -68,6 +69,20 @@ def yahoo_history_url(symbol: str, market: str) -> str:
     return f"https://finance.yahoo.com/quote/{ticker}/history"
 
 
+def yahoo_chart_url(symbol: str, market: str, trading_day: str) -> str:
+    """Return Yahoo's raw chart endpoint for the trading day window."""
+    ticker = quote(to_yahoo_ticker(symbol, market), safe="")
+    start = datetime.fromisoformat(trading_day).replace(tzinfo=timezone.utc)
+    end = start + timedelta(days=2)
+    period1 = int(start.timestamp())
+    period2 = int(end.timestamp())
+    return (
+        f"https://query1.finance.yahoo.com/v8/finance/chart/{ticker}"
+        f"?period1={period1}&period2={period2}&interval=1d"
+        "&events=history&includeAdjustedClose=true"
+    )
+
+
 def canonical_price_payload(
     *,
     symbol: str,
@@ -103,26 +118,37 @@ def hash_price_bar(
         close=bar.close,
         role=role,
     )
-    serialized = json.dumps(payload, ensure_ascii=False, sort_keys=True)
-    cache_key = f"price_{market}_{symbol}_{bar.trading_day}_{role}"
-    provenance = write_provenance(
-        cache_key,
-        source_url=yahoo_history_url(symbol, market),
-        content=serialized,
-        parser_version="yahoo_price_bar_v1",
-        metadata=payload,
-        cache_dir=cache_dir,
-    )
+    cache_key = f"price_raw_{market}_{symbol}_{bar.trading_day}_{role}"
+    source_url = yahoo_chart_url(symbol, market, bar.trading_day)
+    try:
+        _, provenance = fetch_url_bytes(
+            source_url,
+            cache_key=cache_key,
+            published_at=market_close_rfc3339(bar.trading_day, market),
+            parser_version="yahoo_chart_response_v1",
+            timeout_seconds=12,
+            cache_dir=cache_dir,
+        )
+        content_sha256 = str(provenance["content_sha256"])
+        manual_review_eligible = True
+        rationale = (
+            f"Yahoo chart endpoint response for {bar.trading_day} contains the public "
+            f"end-of-day close used for {role}."
+        )
+    except Exception as exc:
+        content_sha256 = ""
+        manual_review_eligible = False
+        rationale = f"Yahoo chart endpoint fetch failed for {bar.trading_day}: {exc}"
+    sidecar_path = Path(cache_dir) / f"{cache_key}.price_bar.json"
+    sidecar_path.parent.mkdir(parents=True, exist_ok=True)
+    sidecar_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return EvidenceArtifact(
-        evidence_url=yahoo_history_url(symbol, market),
+        evidence_url=source_url,
         evidence_published_at=market_close_rfc3339(bar.trading_day, market),
-        content_sha256=str(provenance["content_sha256"]),
-        evidence_rationale=(
-            f"Adjusted close on {bar.trading_day} is the earliest public end-of-day "
-            f"price observation used for {role}."
-        ),
+        content_sha256=content_sha256,
+        evidence_rationale=rationale,
         is_estimated_date=False,
-        manual_review_eligible=True,
+        manual_review_eligible=manual_review_eligible,
         cache_key=cache_key,
     )
 
@@ -132,6 +158,9 @@ def fetch_url_bytes(
     *,
     user_agent: str | None = None,
     cache_key: str | None = None,
+    published_at: str | None = None,
+    parser_version: str = "url_fetch_v2",
+    timeout_seconds: int = 15,
     cache_dir: Path | str = DEFAULT_CACHE_DIR,
 ) -> tuple[bytes, dict[str, Any]]:
     """Fetch URL bytes once and persist provenance sidecar."""
@@ -142,8 +171,9 @@ def fetch_url_bytes(
     meta_path = root / f"{safe_key}.provenance.json"
     if meta_path.exists() and (source_path.exists() or binary_path.exists()):
         metadata = json.loads(meta_path.read_text(encoding="utf-8"))
-        content = binary_path.read_bytes() if binary_path.exists() else source_path.read_bytes()
-        return content, metadata
+        if metadata.get("source_url") == url:
+            content = binary_path.read_bytes() if binary_path.exists() else source_path.read_bytes()
+            return content, metadata
 
     request = Request(
         url,
@@ -158,7 +188,7 @@ def fetch_url_bytes(
         ssl_context = ssl.create_default_context(cafile=certifi.where())
     except ImportError:
         ssl_context = ssl.create_default_context()
-    with urlopen(request, timeout=45, context=ssl_context) as response:
+    with urlopen(request, timeout=timeout_seconds, context=ssl_context) as response:
         content = response.read()
     content_sha256 = hashlib.sha256(content).hexdigest()
     fetched_at = datetime.now(timezone.utc).isoformat()
@@ -167,12 +197,15 @@ def fetch_url_bytes(
         "source_url": url,
         "fetched_at": fetched_at,
         "content_sha256": content_sha256,
-        "parser_version": "url_fetch_v1",
+        "published_at": published_at,
+        "parser_version": parser_version,
     }
     root.mkdir(parents=True, exist_ok=True)
     if url.lower().endswith((".htm", ".html", ".txt")):
+        binary_path.unlink(missing_ok=True)
         source_path.write_text(content.decode("utf-8", errors="replace"), encoding="utf-8")
     else:
+        source_path.unlink(missing_ok=True)
         binary_path.write_bytes(content)
     meta_path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
     return content, metadata

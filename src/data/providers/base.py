@@ -34,8 +34,8 @@ class OfficialDisclosure:
 
 
 def parse_iso_date(value: str) -> date:
-    """Parse YYYY-MM-DD."""
-    return date.fromisoformat(value)
+    """Parse YYYY-MM-DD or RFC3339 datetime by date prefix."""
+    return date.fromisoformat(str(value)[:10])
 
 
 def add_calendar_days(iso_date: str, days: int) -> str:

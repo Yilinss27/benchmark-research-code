@@ -1,8 +1,10 @@
 {
   "package": "b_event_evidence_v1",
   "table_file": "calibration/b_event_evidence_table.csv",
-  "table_sha256": "5802c37203f0cfc301a29a1bb3b7a640eb90e2572f686b948535b330b411d822",
+  "table_sha256": "35d1ead81b797721aa4f3bdd9b40ccd98fb824c80f7e116202767703740c8281",
   "record_count": 138,
+  "eligible_count": 132,
+  "ineligible_count": 6,
   "review_status": "draft",
-  "notes": "Independent calibration table for temporal provenance audit."
+  "notes": "Temporal provenance calibration generated under strict evidence requirements."
 }
