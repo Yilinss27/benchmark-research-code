@@ -94,6 +94,29 @@ A1 prompt 使用 `{currency_unit}`（`元` / `USD` / `HKD`），避免美股/港
 | `quality_flags` | 如 `modeled_outcome_availability`、`fundamentals_after_origin` |
 | `official_temporal_eligible` | 是否具备进入官方分所需的时间证据 |
 
+### Path B / v2 review ledger
+
+`calibration/review_ledger_v2.csv` 固定覆盖基线 commit
+`736273f4d211c0c31fab43da1fbfd49509598e85` 中的 A1、A2-T、B，共 543 个
+唯一 `task_id`。T1/T2 发布包只包含 A1、A2-T、B-earnings，共 530 行；
+B-macro 仅用于 calibration。
+
+审核字段和允许值：
+
+| 字段 | 规则 |
+|------|------|
+| `scope_role` | `temporal_t1_t2` / `b_calibration` / `both` |
+| `review_status` | `reviewed` / `draft` |
+| `review_method` | `manual_first_party_snapshot_review` / `manual_price_snapshot_review` / `manual_event_and_price_review` / `excluded_unfetchable_official_source` |
+| `event_evidence_status` | `not_applicable` / `reviewed` / `draft` / `missing` |
+| `price_evidence_status` | `not_applicable` / `reviewed` / `draft` / `missing` |
+| `exclusion_reason_code` | reviewed 行必须为空；draft 行必须为稳定非空枚举 |
+| `evidence_package_sha256` | 对 `calibration/evidence_packages_v2.jsonl` 中该 task 的排序证据项做规范化 JSON SHA-256 |
+
+`official_temporal_eligible=true` 要求所有适用证据状态为 `reviewed`、证据包
+哈希有效、无排除原因，且 `reviewed_at` 严格晚于包内所有 snapshot 的
+`fetched_at`。自动脚本验证本身不能把记录升级为 `reviewed`。
+
 默认论文参数（`gpt-4.1` backbone）：
 
 - `backbone_training_cutoff = 2024-06-30`（GPT-4.1 的 “June 2024” 按月末保守处理）

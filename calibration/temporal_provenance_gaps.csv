@@ -1,6 +1,4 @@
 task_id,category,status,reason
-B-MACRO-CN_A-20250109-CPI-600519,B,missing_event_evidence,Official event URL present but fetch failed: The read operation timed out
-B-MACRO-CN_A-20250127-PMI-601318,B,missing_event_evidence,Official event URL present but fetch failed: The read operation timed out
 B-MACRO-US-20240911-CPI-JPM,B,missing_event_evidence,Official event URL present but fetch failed: HTTP Error 403: Forbidden
 B-MACRO-US-20241101-NFP-JPM,B,missing_event_evidence,Official event URL present but fetch failed: HTTP Error 403: Forbidden
 B-MACRO-US-20250115-CPI-AAPL,B,missing_event_evidence,Official event URL present but fetch failed: HTTP Error 403: Forbidden

@@ -1,10 +1,10 @@
 {
   "package": "b_event_evidence_v1",
   "table_file": "calibration/b_event_evidence_table.csv",
-  "table_sha256": "35d1ead81b797721aa4f3bdd9b40ccd98fb824c80f7e116202767703740c8281",
+  "table_sha256": "dd75af94b8ebb84d1d30daa5e36d9c56eb6e22314ff050f58d135d92993e41c2",
   "record_count": 138,
-  "eligible_count": 132,
-  "ineligible_count": 6,
+  "eligible_count": 134,
+  "ineligible_count": 4,
   "review_status": "draft",
   "notes": "Temporal provenance calibration generated under strict evidence requirements."
 }

@@ -1,0 +1,5 @@
+task_id,exclusion_reason_code,review_notes
+B-MACRO-US-20240911-CPI-JPM,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。
+B-MACRO-US-20241101-NFP-JPM,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。
+B-MACRO-US-20250115-CPI-AAPL,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。
+B-MACRO-US-20250207-NFP-MSFT,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。

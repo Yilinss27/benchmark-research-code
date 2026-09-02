@@ -6,6 +6,7 @@ results/
 /data/
 /seeds/
 /hf_dataset/
+/hf_dataset_path_b_v2/
 
 # Hugging Face / tooling caches
 .cache/

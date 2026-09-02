@@ -59,13 +59,13 @@ MACRO_EVENTS_PATH = ROOT / "configs/macro_events_v1.json"
 REVIEWER = "DeepFinEval audit"
 B_EVENT_OVERRIDES = {
     "B-MACRO-CN_A-20250109-CPI-600519": {
-        "event_url": "https://www.stats.gov.cn/sj/zxfb/202501/t20250109_1958170.html",
+        "event_url": "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202501/t20250109_1958170.html",
         "first_public_at": "2025-01-09T01:30:00Z",
         "timeout_seconds": 45,
         "rationale": "国家统计局 2025-01-09 09:30（Asia/Shanghai）发布 2024 年 12 月 CPI 数据。",
     },
     "B-MACRO-CN_A-20250127-PMI-601318": {
-        "event_url": "https://www.stats.gov.cn/sj/zxfb/202501/t20250127_1958493.html",
+        "event_url": "https://www.stats.gov.cn/xxgk/sjfb/zxfb2020/202501/t20250127_1958493.html",
         "first_public_at": "2025-01-27T01:30:00Z",
         "timeout_seconds": 45,
         "rationale": "国家统计局 2025-01-27 09:30（Asia/Shanghai）发布 2025 年 1 月 PMI 数据。",
@@ -107,6 +107,9 @@ TABLE2_FIELDS = [
     "evidence_url",
     "content_sha256",
     "evidence_rationale",
+    "price_evidence_url",
+    "price_evidence_published_at",
+    "price_content_sha256",
     "manual_review_eligible",
     "direction_link",
     "reviewer",
@@ -525,6 +528,31 @@ def build_b_row(
             content_sha256=sha,
             estimated=False,
         )
+    price_evidence_url = ""
+    price_evidence_published_at = ""
+    price_content_sha256 = ""
+    price_eligible = record.get("variant") != "earnings"
+    if record.get("variant") == "earnings":
+        outcome_day = str(enrichment.get("outcome_available_at") or "")[:10]
+        symbol = str(seed.get("stock_code") or "")
+        try:
+            reaction_bar = price_provider.get_close_on_or_before(
+                symbol, market, outcome_day
+            )
+        except Exception:
+            reaction_bar = None
+        if reaction_bar is not None and reaction_bar.trading_day == outcome_day:
+            price_artifact = hash_price_bar(
+                symbol=symbol,
+                market=market,
+                bar=reaction_bar,
+                role="event_reaction_close",
+            )
+            price_evidence_url = price_artifact.evidence_url
+            price_evidence_published_at = price_artifact.evidence_published_at
+            price_content_sha256 = price_artifact.content_sha256
+            price_eligible = price_artifact.manual_review_eligible
+    eligible = eligible and price_eligible
     ground_truth = record.get("ground_truth") or {}
     direction = ground_truth.get("actual_direction")
     outcome_day = enrichment.get("outcome_available_at")
@@ -540,6 +568,9 @@ def build_b_row(
         "evidence_url": event_url,
         "content_sha256": sha,
         "evidence_rationale": rationale,
+        "price_evidence_url": price_evidence_url,
+        "price_evidence_published_at": price_evidence_published_at,
+        "price_content_sha256": price_content_sha256,
         "manual_review_eligible": "是" if eligible else "否",
         "direction_link": direction_link,
         "reviewer": REVIEWER,
