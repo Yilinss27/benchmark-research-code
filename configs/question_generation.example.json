@@ -1,0 +1,38 @@
+{
+  "schema_version": "question_generation_v1",
+  "output_dir": "../generated_questions",
+  "training_cutoff": "2024-06-30",
+  "current_date": "2026-08-17",
+  "require_evidence": false,
+  "jobs": [
+    {
+      "task_type": "A1",
+      "input_csv": "../data/a1_price_snapshots.csv",
+      "output_jsonl": "data/a1/train.jsonl",
+      "market": "CN_A",
+      "currency": "CNY",
+      "currency_unit": "元"
+    },
+    {
+      "task_type": "A2-T",
+      "price_series_csv": "../data/a2_price_series.csv",
+      "output_jsonl": "data/a2_t/train.jsonl",
+      "market": "CN_A",
+      "currency": "CNY"
+    },
+    {
+      "task_type": "B",
+      "input_csv": "../data/b_events.csv",
+      "output_jsonl": "data/b/train.jsonl",
+      "market": "CN_A",
+      "currency": "CNY"
+    },
+    {
+      "task_type": "C",
+      "input_csv": "../data/c_financial_snapshots.csv",
+      "output_jsonl": "data/c/train.jsonl",
+      "market": "CN_A",
+      "currency": "CNY"
+    }
+  ]
+}

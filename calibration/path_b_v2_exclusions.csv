@@ -1,5 +1,544 @@
 task_id,exclusion_reason_code,review_notes
-B-MACRO-US-20240911-CPI-JPM,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。
-B-MACRO-US-20241101-NFP-JPM,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。
-B-MACRO-US-20250115-CPI-AAPL,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。
-B-MACRO-US-20250207-NFP-MSFT,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。
+A1-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20220630-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20221230-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230331-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230630-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20230929-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20231229-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20240329-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00013,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00014,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00015,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00016,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00017,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00018,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00019,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-CN_A-20260130-00020,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00007,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20220630-00012,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20221230-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20221230-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20221230-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230331-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230331-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230331-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230630-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230630-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230630-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230929-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230929-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20230929-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20231229-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20231229-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20231229-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20240329-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20240329-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20240329-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20260130-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20260130-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-HK-20260130-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00004,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00005,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00006,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00008,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00009,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00010,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20220630-00011,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20221230-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20221230-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20221230-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230331-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230331-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230331-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230630-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230630-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230630-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230929-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230929-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20230929-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20231229-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20231229-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20231229-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20240329-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20240329-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20240329-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20260130-00001,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20260130-00002,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A1-US-20260130-00003,human_attestation_missing,已采集 forward close 原始响应快照；等待独立人工签核。
+A2T-00001,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-00002,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20190628-consumer,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20190628-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20190628-pharma,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20190628-tech,human_attestation_missing,已采集固定基线标的名单及全部 10 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20191231-consumer,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20191231-financial,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20200331-consumer,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20200331-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20200331-pharma,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20200331-tech,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20201231-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20201231-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20201231-pharma,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20201231-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20210630-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20210630-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20210630-pharma,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20210630-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20211231-consumer,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20211231-financial,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20220331-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20220331-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20220331-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20220331-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20221230-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20221230-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20221230-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20221230-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230331-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230331-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230331-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230331-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230630-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230630-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230630-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230630-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230929-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230929-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230929-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20230929-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20231229-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20231229-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20231229-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20231229-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20240329-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20240329-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20240329-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20240329-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20241231-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20241231-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20241231-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20241231-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250331-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250331-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250331-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250331-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250606-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250606-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250606-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250606-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250930-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250930-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250930-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20250930-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20251231-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20251231-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20251231-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20251231-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260130-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260130-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260130-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260130-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260331-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260331-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260331-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260331-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260601-consumer,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260601-financial,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260601-pharma,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-CN_A-20260601-tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20190628-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20191231-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20200331-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20200331-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20201231-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20201231-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 8 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20210630-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20210630-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 10 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20211231-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20220331-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20220331-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 11 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20221230-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20221230-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20230331-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20230331-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20230630-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20230630-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20230929-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20230929-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20231229-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20231229-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20240329-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20240329-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20241231-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20241231-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20250331-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20250331-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20250606-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20250606-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20250930-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20250930-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20251231-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20251231-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20260130-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20260130-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20260331-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20260331-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20260601-hk_bluechip,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-HK-20260601-hk_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20190628-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20190628-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20191231-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20200331-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20200331-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20201231-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20201231-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20210630-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20210630-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20211231-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 6 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20220331-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20220331-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20221230-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20221230-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20230331-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20230331-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20230630-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20230630-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20230929-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20230929-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20231229-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20231229-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20240329-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20240329-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20241231-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20241231-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20250331-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20250331-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20250606-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20250606-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20250930-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20250930-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20251231-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20251231-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20260130-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20260130-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20260331-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20260331-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20260601-us_mega,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+A2T-US-20260601-us_tech,human_attestation_missing,已采集固定基线标的名单及全部 12 个标的的 forward close 原始响应快照；等待独立人工签核。
+B-EARN-00001,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-00002,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-00003,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-00004,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-00005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20231019-300750,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20231020-600519,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20231025-600276,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20231027-000858,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20231028-601318,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20231028-601398,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20231030-000333,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20231030-002594,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240119-600036,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240808-600519,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240819-000333,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240821-600276,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240822-601318,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240828-000858,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240828-002594,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240829-600036,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20240830-601398,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20250414-300750,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20250424-600276,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20250425-000858,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20250425-002594,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20250429-000333,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20250429-600036,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20250429-600519,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20250429-601398,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20260123-600036,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20260309-300750,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20260325-600276,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20260327-002594,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20260327-601398,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20260330-000333,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20260416-600519,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-CN_A-20260430-000858,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20220518-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20220526-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20220801-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20221116-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20221117-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20230220-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20230223-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20230322-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20230502-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20230517-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20230801-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20230810-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20230816-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20231030-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20231115-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20231116-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240207-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240221-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240320-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240430-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240514-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240514-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240731-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240814-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20240815-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20241029-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20241113-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20241115-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250218-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250220-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250319-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250429-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250514-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250515-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250730-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250813-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20250829-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20251028-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20251113-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20251125-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20260225-0005,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20260318-0700,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-HK-20260319-9988,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20220714-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20220726-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20220728-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230113-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230124-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230202-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230414-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230425-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230504-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230714-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230725-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20230803-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20231013-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20231024-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20231102-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20240112-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20240130-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20240201-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20240412-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20240425-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20240502-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20240730-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20240801-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20241011-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20241030-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20241031-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250115-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250129-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250130-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250411-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250430-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250501-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250715-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250730-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20250731-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20251014-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20251029-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20251030-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20260113-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20260128-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20260129-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20260414-JPM,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20260429-MSFT,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-EARN-US-20260430-AAPL,human_attestation_missing,已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。
+B-MACRO-CN_A-20241018-GDP-601398,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-CN_A-20241109-CPI-601318,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-CN_A-20241130-PMI-300750,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-CN_A-20250109-CPI-600519,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-CN_A-20250127-PMI-601318,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-HK-20241031-GDP-0700,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-HK-20241121-CPI-0005,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-HK-20250123-CPI-1299,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-HK-20250131-GDP-0700,human_attestation_missing,已采集宏观事件第一方发布快照；等待独立人工签核。
+B-MACRO-US-20240911-CPI-JPM,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败。
+B-MACRO-US-20241101-NFP-JPM,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败。
+B-MACRO-US-20250115-CPI-AAPL,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败。
+B-MACRO-US-20250207-NFP-MSFT,official_event_snapshot_unfetchable,官方事件 URL 可定位，但自动抓取失败。

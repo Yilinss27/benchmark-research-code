@@ -106,20 +106,29 @@ def load_cohorts(path: Path) -> dict[str, dict[str, Any]]:
         grouped: dict[str, dict[str, Any]] = {}
         for row in reader:
             cohort_id = row["cohort_id"].strip()
+            task_id = str(row.get("task_id") or "").strip() or None
             group = grouped.setdefault(
                 cohort_id,
                 {
                     "cohort_id": cohort_id,
+                    "task_id": task_id,
                     "industry_name": row["industry_name"].strip(),
                     "cutoff_date": row["cutoff_date"].strip(),
                     "prediction_window_days": int(row["prediction_window_days"]),
                     "stocks": [],
                 },
             )
+            if group.get("task_id") != task_id:
+                raise ValueError(f"Cohort {cohort_id} has inconsistent task_id values")
             group["stocks"].append(
                 {
                     "code": _normalize_stock_code(row["stock_code"]),
                     "name": row["stock_name"].strip(),
+                    "forward_trading_day": (
+                        row["forward_trading_day"].strip()
+                        if row.get("forward_trading_day")
+                        else None
+                    ),
                 }
             )
     return grouped

@@ -107,15 +107,25 @@ B-macro 仅用于 calibration。
 |------|------|
 | `scope_role` | `temporal_t1_t2` / `b_calibration` / `both` |
 | `review_status` | `reviewed` / `draft` |
-| `review_method` | `manual_first_party_snapshot_review` / `manual_price_snapshot_review` / `manual_event_and_price_review` / `excluded_unfetchable_official_source` |
+| `review_method` | 必须来自 `configs/path_b_v2_review_contract.json` 的正式枚举；正式值尚未提供时留空 |
 | `event_evidence_status` | `not_applicable` / `reviewed` / `draft` / `missing` |
 | `price_evidence_status` | `not_applicable` / `reviewed` / `draft` / `missing` |
 | `exclusion_reason_code` | reviewed 行必须为空；draft 行必须为稳定非空枚举 |
 | `evidence_package_sha256` | 对 `calibration/evidence_packages_v2.jsonl` 中该 task 的排序证据项做规范化 JSON SHA-256 |
 
-`official_temporal_eligible=true` 要求所有适用证据状态为 `reviewed`、证据包
-哈希有效、无排除原因，且 `reviewed_at` 严格晚于包内所有 snapshot 的
-`fetched_at`。自动脚本验证本身不能把记录升级为 `reviewed`。
+自动构建默认全部为 `draft`。`official_temporal_eligible=true` 还要求：
+
+- `calibration/review_attestations_v2.csv` 存在独立人工签核；
+- 签核中的 task、证据包 SHA、审核人、正式 review method 与 ledger 完全一致；
+- `attestation_sha256` 可由签核字段规范化重算；
+- 所有适用证据状态为 `reviewed`，且不存在 blocking flags 或排除原因；
+- `reviewed_at` 严格晚于包内所有 snapshot 的 `fetched_at`。
+
+原始证据按内容寻址保存为
+`hf_dataset_path_b_v2/evidence/snapshots/<SHA 前两位>/<完整 SHA-256>`。
+Validator 会打开每个文件并重算 SHA，不能只信 sidecar。当前需求文本未包含其
+引用的正式 `review_method` 枚举，因此 contract 暂为空；在正式值补入前，
+任何记录都不能晋升为 `reviewed`。
 
 默认论文参数（`gpt-4.1` backbone）：
 

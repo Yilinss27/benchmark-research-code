@@ -117,17 +117,21 @@ def load_price_series(path: Path) -> dict[str, dict[str, Any]]:
         grouped: dict[str, dict[str, Any]] = {}
         for row in reader:
             cohort_id = row["cohort_id"].strip()
+            task_id = str(row.get("task_id") or "").strip() or None
             stock_code = _normalize_stock_code(row["stock_code"])
             cohort = grouped.setdefault(
                 cohort_id,
                 {
                     "cohort_id": cohort_id,
+                    "task_id": task_id,
                     "industry_name": row["industry_name"].strip(),
                     "cutoff_date": row["cutoff_date"].strip(),
                     "prediction_window_days": int(row["prediction_window_days"]),
                     "stocks": {},
                 },
             )
+            if cohort.get("task_id") != task_id:
+                raise ValueError(f"Cohort {cohort_id} has inconsistent task_id values")
             stock = cohort["stocks"].setdefault(
                 stock_code,
                 {
@@ -135,6 +139,7 @@ def load_price_series(path: Path) -> dict[str, dict[str, Any]]:
                     "name": row["stock_name"].strip(),
                     "prices": [],
                     "actual_return": None,
+                    "forward_trading_day": None,
                 },
             )
             stock["prices"].append(
@@ -144,6 +149,8 @@ def load_price_series(path: Path) -> dict[str, dict[str, Any]]:
                 }
             )
             stock["actual_return"] = float(row["actual_return"])
+            if row.get("forward_trading_day"):
+                stock["forward_trading_day"] = row["forward_trading_day"].strip()
     return grouped
 
 

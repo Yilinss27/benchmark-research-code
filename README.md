@@ -160,6 +160,19 @@ The output `metrics_summary.json` includes `by_time_band`.
 
 Builders read local CSV files from `data/` and write JSONL records to `seeds/`. These directories are local working directories and are not committed to GitHub.
 
+For a reproducible multi-task build from user-supplied files, use the manifest-driven
+generator. It preserves supplied task IDs, records input/output hashes, archives supplied
+evidence by content hash, and always leaves automated output in `draft`:
+
+```bash
+python -m src.question_generator \
+  --spec configs/question_generation.example.json \
+  --clean
+```
+
+See [`docs/question_generation.md`](docs/question_generation.md) for the input contract
+and evidence format.
+
 Example builder commands:
 
 ```bash

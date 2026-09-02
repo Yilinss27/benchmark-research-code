@@ -21,23 +21,21 @@
     "data/d/train.jsonl": "a0c339d0ada9e05472173ceaa7580a490f1f845651321bd496d8f4efb57f1527",
     "data/e/train.jsonl": "bc4ee2f25b2e68f1e15603f52621320c4def26f7890abeae4d3b8205ac0b77a1"
   },
-  "review_methods": [
-    "excluded_unfetchable_official_source",
-    "manual_event_and_price_review",
-    "manual_first_party_snapshot_review",
-    "manual_price_snapshot_review"
-  ],
-  "reviewed_count": 539,
-  "draft_count": 4,
-  "exclusion_count": 4,
+  "review_methods": [],
+  "reviewed_count": 0,
+  "draft_count": 543,
+  "exclusion_count": 543,
+  "snapshot_count": 2246,
   "files": {
-    "calibration/review_ledger_v2.csv": "15a097551eb681a743d47810895d5fb50f1322e25cdac9327f092575e0ec574e",
-    "calibration/evidence_packages_v2.jsonl": "3a071c55a5f3f975b6daa1c3ffcef51ec8ffd66e1d028e9f293b32ba1b457f94",
-    "calibration/path_b_v2_exclusions.csv": "01b1c55c280b6171772fa7d6b3059cd4765864dd9def519385898f1763742309",
+    "calibration/review_ledger_v2.csv": "b503cbfdf4f07260c0b1d6e355a5ed12a3879c17b3ce325b49c068dddfd8ebf9",
+    "calibration/review_attestations_v2.csv": "eb0db4557fec7fc32c0c561ce19af96a72cb213dfebc8ec5c0070d68ba65f0f1",
+    "calibration/evidence_packages_v2.jsonl": "d6adc6e754c9ade2c03d17ed960acdd55e2efaa61c676ec316b9eda010161824",
+    "calibration/path_b_v2_exclusions.csv": "99284932c709fa7316c99b00ac7d2a331a159f80cc23b33c9605535986efc33b",
+    "configs/path_b_v2_review_contract.json": "c351775eb8a25bfea6ac427324d88b6f71d941f830b271281fb7efac6ec8f065",
     "calibration/temporal_provenance_table.csv": "fa48a30e658feec11cc84b6ff22a61132760263eac68d3d64dbdd60a62f1d52b",
     "calibration/b_event_evidence_table.csv": "dd75af94b8ebb84d1d30daa5e36d9c56eb6e22314ff050f58d135d92993e41c2",
-    "data/a1/train.jsonl": "6d80de4af160082735e9645fb6f168692657831ab031f2f3e3a28de0e78b9eb2",
-    "data/a2_t/train.jsonl": "d60081325935dd202d7b3e0b6497384b5db931f112ee2af10f3e977435012f82",
-    "data/b_earnings/train.jsonl": "7a32cea2d505a7e9e4901eee67beb1286510c2d745364ad536215c0c735c8c6c"
+    "data/a1/train.jsonl": "aca31f3a5df65a902cfd6e9504d60ed06ae392a79e2a17fa9b1c309f0d64bd68",
+    "data/a2_t/train.jsonl": "b333d2150d65dc1867605cfebc62f32313a1ed16fc9a937f432688675551b2a6",
+    "data/b_earnings/train.jsonl": "5e3505c0d2a85cb639146f41978355a811a686bef41c55e2285610368b1d4a67"
   }
 }

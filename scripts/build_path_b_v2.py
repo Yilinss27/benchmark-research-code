@@ -9,7 +9,7 @@ import hashlib
 import json
 import shutil
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -28,17 +28,31 @@ LEDGER_PATH = ROOT / "calibration/review_ledger_v2.csv"
 PACKAGES_PATH = ROOT / "calibration/evidence_packages_v2.jsonl"
 MANIFEST_PATH = ROOT / "calibration/path_b_v2_manifest.json"
 EXCLUSIONS_PATH = ROOT / "calibration/path_b_v2_exclusions.csv"
+ATTESTATIONS_PATH = ROOT / "calibration/review_attestations_v2.csv"
+REVIEW_CONTRACT_PATH = ROOT / "configs/path_b_v2_review_contract.json"
 TEMPORAL_INDEX_PATH = ROOT / "data/task_temporal_index.jsonl"
 TABLE1_PATH = ROOT / "calibration/temporal_provenance_table.csv"
 TABLE2_PATH = ROOT / "calibration/b_event_evidence_table.csv"
 
 COLLECTOR_ID = "deepfineval_evidence_collector_v2"
-REVIEWER_ID = "deepfineval_temporal_reviewer_v2"
-REVIEW_METHODS = {
-    "manual_first_party_snapshot_review",
-    "manual_price_snapshot_review",
-    "manual_event_and_price_review",
-    "excluded_unfetchable_official_source",
+ATTESTATION_FIELDS = (
+    "task_id",
+    "decision",
+    "reviewer_id",
+    "review_method",
+    "reviewed_at",
+    "evidence_package_sha256",
+    "review_notes",
+    "attestation_sha256",
+)
+BLOCKING_FLAGS = {
+    "fundamentals_after_origin",
+    "heuristic_outcome_availability",
+    "missing_event_evidence",
+    "missing_outcome_evidence",
+    "modeled_outcome_availability",
+    "non_pit_fundamentals",
+    "official_disclosure_lookup_failed",
 }
 EXCLUDED_FILE_HASHES = {
     "data/a2_f/train.jsonl": "2258a0c7ef13c93da1d995b7d8739178b4dff141c0082603f0d6a2ba7f43f4d0",
@@ -83,6 +97,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--baseline", type=Path, default=DEFAULT_BASELINE)
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--fetch-content", action="store_true")
+    parser.add_argument("--attestations", type=Path, default=ATTESTATIONS_PATH)
     return parser.parse_args()
 
 
@@ -97,6 +112,21 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def load_csv(path: Path) -> dict[str, dict[str, str]]:
     with path.open(encoding="utf-8", newline="") as handle:
         return {row["task_id"]: row for row in csv.DictReader(handle)}
+
+
+def load_review_methods() -> set[str]:
+    contract = json.loads(REVIEW_CONTRACT_PATH.read_text(encoding="utf-8"))
+    return {str(value) for value in contract.get("review_method_enum", [])}
+
+
+def normalize_flags(*values: Any) -> set[str]:
+    flags: set[str] = set()
+    for value in values:
+        if isinstance(value, str):
+            flags.update(part.strip() for part in value.split(",") if part.strip())
+        elif isinstance(value, list):
+            flags.update(str(part).strip() for part in value if str(part).strip())
+    return flags
 
 
 def sha256_bytes(content: bytes) -> str:
@@ -125,7 +155,12 @@ def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
 def write_csv(path: Path, fields: tuple[str, ...], rows: list[dict[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields, extrasaction="ignore")
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=fields,
+            extrasaction="ignore",
+            lineterminator="\n",
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -152,6 +187,7 @@ def snapshot_item(cache_key: str, kind: str) -> dict[str, Any] | None:
         "published_at": metadata.get("published_at"),
         "fetched_at": metadata.get("fetched_at"),
         "snapshot_sha256": actual_sha,
+        "snapshot_path": f"evidence/snapshots/{actual_sha[:2]}/{actual_sha}",
         "parser_version": metadata.get("parser_version"),
     }
 
@@ -226,6 +262,7 @@ def baseline_item(record: dict[str, Any], hf_config: str) -> dict[str, Any]:
         "published_at": None,
         "fetched_at": None,
         "snapshot_sha256": canonical_sha(record),
+        "snapshot_path": None,
         "parser_version": "path_b_v2_baseline_identity",
     }
 
@@ -239,16 +276,67 @@ def package_row(task_id: str, items: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def reviewed_after(items: list[dict[str, Any]]) -> str:
-    now = datetime.now(timezone.utc)
-    fetched = [
-        datetime.fromisoformat(str(item["fetched_at"]).replace("Z", "+00:00"))
-        for item in items
-        if item.get("fetched_at")
-    ]
-    if fetched and now <= max(fetched):
-        raise ValueError("reviewed_at must be later than every snapshot fetched_at")
-    return now.isoformat().replace("+00:00", "Z")
+def attestation_payload(row: dict[str, str]) -> dict[str, str]:
+    return {field: row.get(field, "") for field in ATTESTATION_FIELDS if field != "attestation_sha256"}
+
+
+def validate_attestation(
+    row: dict[str, str],
+    *,
+    task_id: str,
+    package: dict[str, Any],
+    review_methods: set[str],
+) -> str | None:
+    if row.get("task_id") != task_id:
+        return "task_id mismatch"
+    if row.get("decision") != "reviewed":
+        return "decision must be reviewed"
+    if not row.get("reviewer_id"):
+        return "reviewer_id is required"
+    if row.get("review_method") not in review_methods:
+        return "review_method is not in the formal contract"
+    if row.get("evidence_package_sha256") != package["evidence_package_sha256"]:
+        return "evidence package hash mismatch"
+    if canonical_sha(attestation_payload(row)) != row.get("attestation_sha256"):
+        return "attestation hash mismatch"
+    try:
+        reviewed_at = datetime.fromisoformat(row["reviewed_at"].replace("Z", "+00:00"))
+    except (KeyError, ValueError):
+        return "reviewed_at must be timezone-aware RFC3339"
+    if reviewed_at.tzinfo is None:
+        return "reviewed_at must include a timezone"
+    for item in package["items"]:
+        if item.get("fetched_at"):
+            fetched_at = datetime.fromisoformat(str(item["fetched_at"]).replace("Z", "+00:00"))
+            if reviewed_at <= fetched_at:
+                return "reviewed_at must be later than every fetched_at"
+    if not row.get("review_notes") or row["review_notes"].strip().lower() == "ok":
+        return "review_notes must describe the manual check"
+    return None
+
+
+def materialize_snapshots(packages: list[dict[str, Any]], output: Path) -> int:
+    cache_root = Path(DEFAULT_CACHE_DIR)
+    copied: set[str] = set()
+    for package in packages:
+        for item in package["items"]:
+            destination_rel = item.get("snapshot_path")
+            if not destination_rel:
+                continue
+            expected_sha = str(item["snapshot_sha256"])
+            if expected_sha in copied:
+                continue
+            cache_key = str(item["cache_key"])
+            binary_path = cache_root / f"{cache_key}.bin"
+            source_path = cache_root / f"{cache_key}.source"
+            source = binary_path if binary_path.exists() else source_path
+            if not source.exists() or sha256_file(source) != expected_sha:
+                raise SystemExit(f"Missing or corrupt source snapshot: {cache_key}")
+            destination = output / str(destination_rel)
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(source, destination)
+            copied.add(expected_sha)
+    return len(copied)
 
 
 def attach_review(record: dict[str, Any], ledger: dict[str, Any]) -> dict[str, Any]:
@@ -290,6 +378,11 @@ B-earnings {counts['b_earnings']}，合计 {sum(counts.values())} 行。
 C、A2-F、A2-H、D、E 不进入本轮；13 条 B-macro 只保留在 calibration
 审核账本，不进入 T1/T2 比较包。每行的 v2 审核字段来自
 `calibration/review_ledger_v2.csv`。
+
+自动构建只采集证据并输出 `draft`。只有
+`calibration/review_attestations_v2.csv` 中存在与当前 evidence package hash
+完全匹配的独立人工签核时，记录才会晋升为 `reviewed`。原始证据按 SHA-256
+存放于 `evidence/snapshots/<前两位>/<完整 SHA-256>`。
 """
 
 
@@ -311,6 +404,10 @@ def main() -> int:
     temporal = {row["task_id"]: row for row in load_jsonl(TEMPORAL_INDEX_PATH)}
     table1 = load_csv(TABLE1_PATH)
     table2 = load_csv(TABLE2_PATH)
+    review_methods = load_review_methods()
+    if not args.attestations.exists():
+        write_csv(args.attestations, ATTESTATION_FIELDS, [])
+    attestations = load_csv(args.attestations)
     provider = YahooPriceProvider()
     ledger_rows: list[dict[str, Any]] = []
     package_rows: list[dict[str, Any]] = []
@@ -330,7 +427,6 @@ def main() -> int:
         price_status = "missing"
         exclusion = ""
         notes = ""
-        method = "manual_price_snapshot_review"
 
         hf_config = "a1" if category == "A1" else "a2_t" if category == "A2" else "b"
         items.append(baseline_item(record, hf_config))
@@ -347,8 +443,8 @@ def main() -> int:
             )
             if item:
                 items.append(item)
-                price_status = "reviewed"
-                notes = "核对固定基线 task 身份及 forward close 官方响应快照与 SHA。"
+                price_status = "draft"
+                notes = "已采集 forward close 原始响应快照；等待独立人工签核。"
             else:
                 exclusion = "price_snapshot_missing"
                 notes = "缺少可核验的 forward close 原始响应快照。"
@@ -371,10 +467,10 @@ def main() -> int:
             expected_count = len((record.get("seed") or {}).get("stock_list", []))
             items.extend(price_items)
             if expected_count and len(price_items) == expected_count:
-                price_status = "reviewed"
+                price_status = "draft"
                 notes = (
-                    f"核对固定基线标的名单及全部 {expected_count} 个标的的 "
-                    "forward close 原始响应快照与 SHA。"
+                    f"已采集固定基线标的名单及全部 {expected_count} 个标的的 "
+                    "forward close 原始响应快照；等待独立人工签核。"
                 )
             else:
                 exclusion = "cohort_price_snapshot_incomplete"
@@ -384,10 +480,9 @@ def main() -> int:
             event = event_item(task_id, table2.get(task_id, {}), fetch_content=args.fetch_content)
             if event:
                 items.append(event)
-                event_status = "reviewed"
+                event_status = "draft"
             is_earnings = variant == "earnings"
             if is_earnings:
-                method = "manual_event_and_price_review"
                 day = str(index.get("outcome_available_at") or "")[:10]
                 price = price_item(
                     provider=provider,
@@ -399,34 +494,62 @@ def main() -> int:
                 )
                 if price:
                     items.append(price)
-                    price_status = "reviewed"
-                if event_status == "reviewed" and price_status == "reviewed":
-                    notes = "核对 earnings 第一方公告及 release-adjusted reaction close 原始快照。"
-                elif event_status != "reviewed":
+                    price_status = "draft"
+                if event_status == "draft" and price_status == "draft":
+                    notes = "已采集 earnings 第一方公告及 reaction close 快照；等待独立人工签核。"
+                elif event_status != "draft":
                     exclusion = "event_snapshot_missing"
                     notes = "缺少可核验的 earnings 第一方公告快照。"
                 else:
                     exclusion = "price_snapshot_missing"
                     notes = "缺少 release-adjusted reaction close 原始响应快照。"
             else:
-                method = "manual_first_party_snapshot_review"
                 price_status = "not_applicable"
-                if event_status == "reviewed":
-                    notes = "核对宏观事件第一方发布页面、发布时间和原始快照 SHA。"
+                if event_status == "draft":
+                    notes = "已采集宏观事件第一方发布快照；等待独立人工签核。"
                 else:
-                    method = "excluded_unfetchable_official_source"
                     exclusion = "official_event_snapshot_unfetchable"
-                    notes = "官方事件 URL 可定位，但自动抓取失败，未标记 reviewed。"
+                    notes = "官方事件 URL 可定位，但自动抓取失败。"
 
-        applicable_ok = (
-            event_status in {"reviewed", "not_applicable"}
-            and price_status in {"reviewed", "not_applicable"}
-            and not exclusion
-        )
         package = package_row(task_id, items)
         package_rows.append(package)
-        reviewed_at = reviewed_after(items) if applicable_ok else ""
-        review_status = "reviewed" if applicable_ok else "draft"
+        blocking_flags = normalize_flags(
+            record.get("quality_flags"),
+            index.get("quality_flags"),
+        )
+        active_blocking_flags = sorted(blocking_flags & BLOCKING_FLAGS)
+        evidence_ready = (
+            event_status in {"draft", "not_applicable"}
+            and price_status in {"draft", "not_applicable"}
+            and not exclusion
+            and not active_blocking_flags
+        )
+        attestation = attestations.get(task_id)
+        if attestation:
+            error = validate_attestation(
+                attestation,
+                task_id=task_id,
+                package=package,
+                review_methods=review_methods,
+            )
+            if error:
+                raise SystemExit(f"Invalid attestation for {task_id}: {error}")
+            if not evidence_ready:
+                raise SystemExit(
+                    f"Attestation for {task_id} cannot override missing evidence or blocking flags"
+                )
+        reviewed = bool(attestation) and evidence_ready
+        if reviewed:
+            event_status = "reviewed" if event_status == "draft" else event_status
+            price_status = "reviewed" if price_status == "draft" else price_status
+            exclusion = ""
+            notes = str(attestation["review_notes"])
+        elif active_blocking_flags:
+            exclusion = "blocking_quality_flags"
+            notes = f"存在阻断标记：{','.join(active_blocking_flags)}。"
+        elif evidence_ready:
+            exclusion = "human_attestation_missing"
+
         ledger = {
             "task_id": task_id,
             "scope_role": (
@@ -439,20 +562,18 @@ def main() -> int:
             "category": category,
             "variant": variant,
             "paper_band": paper_band,
-            "review_status": review_status,
-            "official_temporal_eligible": "true" if applicable_ok else "false",
+            "review_status": "reviewed" if reviewed else "draft",
+            "official_temporal_eligible": "true" if reviewed else "false",
             "collector_id": COLLECTOR_ID,
-            "reviewer_id": REVIEWER_ID,
-            "review_method": method,
-            "reviewed_at": reviewed_at,
+            "reviewer_id": attestation["reviewer_id"] if reviewed else "",
+            "review_method": attestation["review_method"] if reviewed else "",
+            "reviewed_at": attestation["reviewed_at"] if reviewed else "",
             "event_evidence_status": event_status,
             "price_evidence_status": price_status,
             "exclusion_reason_code": exclusion,
             "review_notes": notes,
             "evidence_package_sha256": package["evidence_package_sha256"],
         }
-        if method not in REVIEW_METHODS:
-            raise AssertionError(method)
         ledger_rows.append(ledger)
         reviewed_by_id[task_id] = ledger
         if exclusion:
@@ -477,6 +598,7 @@ def main() -> int:
 
     if args.output.exists():
         shutil.rmtree(args.output)
+    snapshot_count = materialize_snapshots(package_rows, args.output)
     candidate_sets = {
         "a1": [attach_review(row, reviewed_by_id[row["task_id"]]) for row in a1_rows],
         "a2_t": [attach_review(row, reviewed_by_id[row["task_id"]]) for row in a2t_rows],
@@ -510,14 +632,17 @@ def main() -> int:
             ),
         },
         "excluded_files_sha256": EXCLUDED_FILE_HASHES,
-        "review_methods": sorted(REVIEW_METHODS),
+        "review_methods": sorted(review_methods),
         "reviewed_count": sum(row["review_status"] == "reviewed" for row in ledger_rows),
         "draft_count": sum(row["review_status"] == "draft" for row in ledger_rows),
         "exclusion_count": len(exclusions),
+        "snapshot_count": snapshot_count,
         "files": {
             "calibration/review_ledger_v2.csv": sha256_file(LEDGER_PATH),
+            "calibration/review_attestations_v2.csv": sha256_file(args.attestations),
             "calibration/evidence_packages_v2.jsonl": sha256_file(PACKAGES_PATH),
             "calibration/path_b_v2_exclusions.csv": sha256_file(EXCLUSIONS_PATH),
+            "configs/path_b_v2_review_contract.json": sha256_file(REVIEW_CONTRACT_PATH),
             "calibration/temporal_provenance_table.csv": sha256_file(TABLE1_PATH),
             "calibration/b_event_evidence_table.csv": sha256_file(TABLE2_PATH),
             "data/a1/train.jsonl": sha256_file(args.output / "data/a1/train.jsonl"),
@@ -534,13 +659,24 @@ def main() -> int:
     shutil.copy2(MANIFEST_PATH, args.output / "path_b_v2_manifest.json")
     calibration_out = args.output / "calibration"
     calibration_out.mkdir(parents=True, exist_ok=True)
-    for source in (LEDGER_PATH, PACKAGES_PATH, EXCLUSIONS_PATH, TABLE1_PATH, TABLE2_PATH):
+    for source in (
+        LEDGER_PATH,
+        args.attestations,
+        PACKAGES_PATH,
+        EXCLUSIONS_PATH,
+        TABLE1_PATH,
+        TABLE2_PATH,
+    ):
         shutil.copy2(source, calibration_out / source.name)
+    contract_out = args.output / "configs"
+    contract_out.mkdir(parents=True, exist_ok=True)
+    shutil.copy2(REVIEW_CONTRACT_PATH, contract_out / REVIEW_CONTRACT_PATH.name)
 
     print(json.dumps(manifest["scope"] | {
         "reviewed": manifest["reviewed_count"],
         "draft": manifest["draft_count"],
         "excluded": manifest["exclusion_count"],
+        "snapshots": manifest["snapshot_count"],
     }, ensure_ascii=False, indent=2))
     return 0
 

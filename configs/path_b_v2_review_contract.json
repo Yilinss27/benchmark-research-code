@@ -1,0 +1,6 @@
+{
+  "schema_version": "path_b_v2_review_contract_v1",
+  "review_method_enum": [],
+  "status": "awaiting_formal_enum",
+  "notes": "The supplied Path B / v2 requirements refer to a formal review_method list but do not include it. No locally invented review method is accepted; therefore no attestation can promote a row until this enum is supplied."
+}
